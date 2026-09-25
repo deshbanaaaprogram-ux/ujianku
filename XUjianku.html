@@ -1,0 +1,1539 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>XUjianku</title>
+<style>
+  :root{
+    --bg:#060912; --bg-1:#0b1120; --bg-2:#101a2e; --bg-3:#16223b;
+    --line:rgba(255,255,255,.09); --line-2:rgba(255,255,255,.16);
+    --text:#eef2fa; --text-dim:#8b96b0; --text-faint:#5b6480;
+    --accent:#2e8bff; --accent-2:#33e0ff; --glow:rgba(46,139,255,.38);
+    --ok:#2fd18a; --warn:#f5b942; --danger:#ef5468;
+    --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{margin:0; background:radial-gradient(120% 100% at 50% -10%,#0c1730 0%,#060912 55%); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased; padding-top:var(--safe-t); padding-bottom:var(--safe-b); overscroll-behavior:none;}
+  h1,h2,h3,p{margin:0;} button{font-family:inherit;}
+  .hidden{display:none !important;}
+  ::-webkit-scrollbar{width:0;height:0;}
+  .glass{background:rgba(16,26,46,.55); backdrop-filter:blur(16px); border:1px solid var(--line); border-radius:18px;}
+  .btn{border:none; border-radius:12px; padding:13px 18px; font-size:13.5px; font-weight:600; cursor:pointer; background:linear-gradient(135deg,var(--accent),#1c63c9); color:#fff; box-shadow:0 8px 24px var(--glow);}
+  .btn:active{transform:scale(.97);}
+  .btn.secondary{background:var(--bg-3); color:var(--text); box-shadow:none; border:1px solid var(--line-2);}
+  .btn.ghost{background:transparent; color:var(--text-dim); box-shadow:none; border:1px solid var(--line);}
+  .btn.danger{background:rgba(239,84,104,.14); color:var(--danger); box-shadow:none; border:1px solid rgba(239,84,104,.35);}
+  .btn.block{width:100%;} .btn.sm{padding:9px 12px; font-size:12px;}
+  input[type=text],input[type=password],input[type=number],input[type=date],textarea,select{
+    width:100%; background:var(--bg-3); border:1px solid var(--line); border-radius:10px; color:var(--text);
+    padding:11px 12px; font-size:13.5px; outline:none;
+  }
+  select{-webkit-appearance:none; background-image:linear-gradient(45deg,transparent 50%,var(--text-dim) 50%),linear-gradient(135deg,var(--text-dim) 50%,transparent 50%); background-position:calc(100% - 16px) center,calc(100% - 11px) center; background-size:5px 5px,5px 5px; background-repeat:no-repeat;}
+  input:focus,select:focus,textarea:focus{border-color:var(--accent);}
+  label.f-label{font-size:11.5px; color:var(--text-dim); display:block; margin-bottom:6px;}
+  .field{margin-bottom:14px;}
+  .section-label{font-size:11px; letter-spacing:1.5px; color:var(--text-faint); margin:24px 2px 10px;}
+
+  /* Splash */
+  #splash{position:fixed; inset:0; z-index:999; background:radial-gradient(130% 130% at 50% 20%,#0f1c3a,#060912 60%);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; transition:opacity .5s;}
+  .splash-logo{font-size:22px; font-weight:800; letter-spacing:2px; background:linear-gradient(135deg,var(--accent-2),var(--accent)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .splash-ring{width:44px; height:44px; border-radius:50%; border:3px solid var(--line-2); border-top-color:var(--accent-2); animation:spin 1s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .splash-txt{font-size:12.5px; color:var(--text-dim);}
+
+  /* Shell */
+  #app{display:none; min-height:100%; flex-direction:column;}
+  #app.ready{display:flex;}
+  .topbar{position:sticky; top:0; z-index:20; display:flex; align-items:center; justify-content:space-between; padding:14px 18px;
+    background:rgba(6,9,18,.7); backdrop-filter:blur(14px); border-bottom:1px solid var(--line);}
+  .brand b{font-size:16px; letter-spacing:1px;}
+  .brand span{font-size:10px; color:var(--text-faint); display:block;}
+  .icon-btn{width:36px; height:36px; border-radius:10px; border:1px solid var(--line); background:var(--bg-1); color:var(--text-dim); display:flex; align-items:center; justify-content:center; cursor:pointer;}
+  main{flex:1; padding:18px 18px 100px; max-width:760px; width:100%; margin:0 auto;}
+
+  .bottomnav{position:fixed; left:0; right:0; bottom:0; z-index:30; display:flex; background:rgba(6,9,18,.85); backdrop-filter:blur(16px);
+    border-top:1px solid var(--line); padding:8px 6px calc(8px + var(--safe-b));}
+  .navbtn{flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; padding:6px 0; background:none; border:none; color:var(--text-faint); cursor:pointer;}
+  .navbtn.active{color:var(--accent-2);}
+  .navbtn span{font-size:10px;}
+
+  .stat-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:10px;}
+  .stat-card{padding:14px; }
+  .stat-card span.k{font-size:10.5px; color:var(--text-faint); letter-spacing:.5px;}
+  .stat-card div.v{font-size:14.5px; font-weight:600; margin-top:4px;}
+  .menu-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:10px;}
+  .menu-item{padding:14px 6px; display:flex; flex-direction:column; align-items:center; gap:8px; cursor:pointer; text-align:center;}
+  .menu-item:active{background:var(--bg-3);}
+  .menu-item svg{color:var(--accent-2);}
+  .menu-item span{font-size:10.5px; color:var(--text-dim);}
+
+  .row{display:flex; align-items:center; gap:12px; padding:14px;}
+  .row .ic{width:40px; height:40px; border-radius:12px; background:var(--bg-3); display:flex; align-items:center; justify-content:center; color:var(--accent-2); flex-shrink:0; border:1px solid var(--line);}
+  .row .tx b{font-size:14px; display:block;} .row .tx span{font-size:11.5px; color:var(--text-dim);}
+  .row .arrow{margin-left:auto; color:var(--text-faint);}
+  .divider{height:1px; background:var(--line); margin:0 12px;}
+
+  .empty-state{text-align:center; padding:36px 20px; border:1px dashed var(--line-2); border-radius:18px; color:var(--text-dim);}
+  .empty-state b{display:block; color:var(--text); font-size:14px; margin-bottom:6px;}
+
+  /* Overlays */
+  .overlay{position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:200; display:none; align-items:flex-end; justify-content:center;}
+  .overlay.center{align-items:center;}
+  .overlay.show{display:flex;}
+  .sheet{background:var(--bg-1); border:1px solid var(--line); border-top-left-radius:20px; border-top-right-radius:20px;
+    width:100%; max-width:520px; padding:18px 18px calc(18px + var(--safe-b)); max-height:86vh; overflow-y:auto; animation:up .2s ease;}
+  .overlay.center .sheet{border-radius:18px; max-width:420px;}
+  @keyframes up{from{transform:translateY(20px); opacity:0;} to{transform:translateY(0); opacity:1;}}
+  .sheet-handle{width:36px; height:4px; background:var(--line-2); border-radius:2px; margin:0 auto 16px;}
+  .sheet h3{font-size:15px; margin-bottom:14px;}
+
+  #toastHost{position:fixed; top:calc(14px + var(--safe-t)); left:0; right:0; z-index:400; display:flex; flex-direction:column; align-items:center; gap:8px; pointer-events:none;}
+  .toast{background:var(--bg-2); border:1px solid var(--line-2); color:var(--text); font-size:12.5px; padding:10px 16px; border-radius:30px;
+    box-shadow:0 10px 30px rgba(0,0,0,.4); opacity:0; transform:translateY(-10px); transition:.25s; max-width:88%; text-align:center;}
+  .toast.show{opacity:1; transform:translateY(0);}
+  .toast.err{border-color:rgba(239,84,104,.5); color:#ffb3bd;}
+  .toast.ok{border-color:rgba(47,209,138,.5); color:#a9f5d4;}
+
+  .badge{font-size:10px; padding:3px 9px; border-radius:10px; border:1px solid var(--line-2); color:var(--text-dim);}
+  .badge.ok{color:var(--ok); border-color:rgba(47,209,138,.4);}
+  .badge.warn{color:var(--warn); border-color:rgba(245,185,66,.4);}
+  .badge.no{color:var(--danger); border-color:rgba(239,84,104,.4);}
+
+  .tabbar{display:flex; gap:6px; padding:4px 0 14px; overflow-x:auto;}
+  .tabbtn{flex-shrink:0; padding:8px 14px; border-radius:20px; font-size:12px; border:1px solid var(--line); background:var(--bg-1); color:var(--text-dim); cursor:pointer;}
+  .tabbtn.active{background:var(--accent); color:#fff; border-color:transparent;}
+
+  .plan-card{padding:20px; margin-bottom:14px; position:relative; overflow:hidden;}
+  .plan-card.vip{border-color:rgba(46,139,255,.4);}
+  .plan-card.vvip{border-color:rgba(51,224,255,.5); box-shadow:0 0 30px rgba(51,224,255,.08);}
+  .plan-name{font-size:15px; font-weight:700; letter-spacing:.5px;}
+  .plan-price{font-size:22px; font-weight:800; margin:8px 0 4px;}
+  .plan-price span{font-size:12px; color:var(--text-dim); font-weight:400;}
+  .plan-feat{font-size:12.5px; color:var(--text-dim); display:flex; gap:8px; padding:5px 0;}
+  .plan-feat svg{color:var(--ok); flex-shrink:0; margin-top:2px;}
+
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:8px;}
+  .opt-btn{padding:11px 6px; border-radius:12px; border:1px solid var(--line); background:var(--bg-1); text-align:center; font-size:12px; color:var(--text-dim); cursor:pointer;}
+  .opt-btn.active{border-color:var(--accent-2); color:var(--text); background:var(--bg-3);}
+
+  .kv{display:flex; justify-content:space-between; padding:8px 0; font-size:12.5px; color:var(--text-dim); border-bottom:1px dashed var(--line);}
+  .kv b{color:var(--text); font-weight:600;}
+
+  /* Exam runner */
+  .exam-wrap{display:flex; flex-direction:column; height:calc(100vh - 0px);}
+  .exam-top{display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--line);}
+  .exam-timer{font-size:14px; font-weight:700; font-variant-numeric:tabular-nums;}
+  .exam-timer.low{color:var(--danger);}
+  .exam-progress{height:4px; background:var(--bg-3);}
+  .exam-progress i{display:block; height:100%; background:linear-gradient(90deg,var(--accent),var(--accent-2));}
+  .exam-body{flex:1; overflow-y:auto; padding:18px;}
+  .qnum{font-size:11.5px; color:var(--text-faint); margin-bottom:8px;}
+  .qtext{font-size:15.5px; line-height:1.5; margin-bottom:18px;}
+  .opt-row{display:flex; align-items:flex-start; gap:12px; padding:13px; border-radius:14px; border:1px solid var(--line); margin-bottom:10px; cursor:pointer;}
+  .opt-row.selected{border-color:var(--accent-2); background:rgba(46,139,255,.08);}
+  .opt-letter{width:26px; height:26px; border-radius:8px; background:var(--bg-3); display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; border:1px solid var(--line);}
+  .opt-row.selected .opt-letter{background:var(--accent); color:#fff; border-color:transparent;}
+  .exam-bottom{display:flex; gap:8px; padding:12px 16px calc(12px + var(--safe-b)); border-top:1px solid var(--line);}
+  .qgrid{display:grid; grid-template-columns:repeat(6,1fr); gap:8px; margin:14px 0;}
+  .qgrid div{aspect-ratio:1; border-radius:8px; border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--text-dim); cursor:pointer;}
+  .qgrid div.answered{background:rgba(47,209,138,.15); border-color:rgba(47,209,138,.4); color:var(--ok);}
+  .qgrid div.flagged{border-color:var(--warn); color:var(--warn);}
+  .qgrid div.current{outline:2px solid var(--accent-2);}
+
+  .result-hero{text-align:center; padding:24px 0;}
+  .result-score{font-size:48px; font-weight:800; background:linear-gradient(135deg,var(--accent-2),var(--accent)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .result-stats{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:16px 0;}
+  .result-stats div{padding:10px 4px; text-align:center;}
+  .result-stats div b{display:block; font-size:16px;} .result-stats div span{font-size:9.5px; color:var(--text-faint);}
+
+  .review-item{padding:14px; margin-bottom:10px;}
+  .review-item .qh{font-size:13px; margin-bottom:8px; font-weight:500;}
+  .review-item .ans{font-size:12px; padding:6px 0;}
+  .review-item .ans.correct{color:var(--ok);} .review-item .ans.wrong{color:var(--danger);}
+  .ai-explain-box{margin-top:10px; padding:10px; background:var(--bg-3); border-radius:10px; font-size:12px; color:var(--text-dim); white-space:pre-wrap;}
+
+  .devgate{max-width:360px; margin:60px auto; text-align:center;}
+  .dev-menu{display:flex; flex-direction:column; gap:8px;}
+  .dev-menu .row{cursor:pointer;}
+  .dev-panel-title{font-size:16px; font-weight:700; margin-bottom:14px;}
+  table.dtable{width:100%; border-collapse:collapse; font-size:12px;}
+  table.dtable th,table.dtable td{padding:8px 6px; text-align:left; border-bottom:1px solid var(--line); white-space:nowrap;}
+  table.dtable th{color:var(--text-faint); font-weight:500; font-size:10.5px;}
+  .tblwrap{overflow-x:auto; margin-top:10px;}
+  .switch{width:42px; height:24px; border-radius:20px; background:var(--bg-3); border:1px solid var(--line); position:relative; cursor:pointer; flex-shrink:0;}
+  .switch i{position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%; background:var(--text-faint); transition:.18s;}
+  .switch.on{background:rgba(46,139,255,.25); border-color:var(--accent);}
+  .switch.on i{transform:translateX(18px); background:var(--accent-2);}
+  .maskkey{font-family:monospace; letter-spacing:1px;}
+  .aiskel{height:12px; background:var(--bg-3); border-radius:6px; margin-bottom:8px; animation:pulse 1.1s infinite;}
+  @keyframes pulse{0%,100%{opacity:.5;}50%{opacity:1;}}
+  .credit{text-align:center; font-size:10.5px; color:var(--text-faint); padding:18px 0 4px;}
+
+  @media (min-width:700px){ .menu-grid{grid-template-columns:repeat(8,1fr);} .bottomnav{display:none;} main{padding-bottom:40px;} .result-stats{grid-template-columns:repeat(5,1fr);} }
+</style>
+</head>
+<body>
+
+<div id="splash">
+  <div class="splash-logo">XUjianku</div>
+  <div class="splash-ring"></div>
+  <div class="splash-txt" id="splashTxt">Mempersiapkan XUjianku...</div>
+</div>
+
+<div id="toastHost"></div>
+
+<!-- ===================== LOGIN ===================== -->
+<div id="loginScreen" class="hidden" style="max-width:420px; margin:0 auto; padding:40px 20px;">
+  <div style="text-align:center; margin-bottom:26px;">
+    <div class="splash-logo" style="font-size:26px;">XUjianku</div>
+    <p style="color:var(--text-dim); font-size:12.5px; margin-top:6px;">Belajar lebih siap, ujian lebih terarah.</p>
+  </div>
+  <div class="glass" style="padding:20px;">
+    <div class="field">
+      <label class="f-label">Username</label>
+      <input type="text" id="loginUsername" placeholder="Masukkan username">
+    </div>
+    <div class="field">
+      <label class="f-label">Code Acak</label>
+      <div style="display:flex; gap:8px;">
+        <input type="text" id="loginCode" placeholder="XU-XXXX-XXXX" style="flex:1;">
+        <button class="btn secondary sm" id="genCodeBtn">Buat Baru</button>
+      </div>
+      <div id="codePreview" style="margin-top:8px; font-size:11.5px; color:var(--text-dim);"></div>
+    </div>
+    <div class="field">
+      <label class="f-label">API Key Gemini (opsional)</label>
+      <input type="password" id="loginApiKey" placeholder="Masukkan API Key">
+    </div>
+    <div class="glass" style="padding:12px; margin-bottom:14px; background:rgba(46,139,255,.06);">
+      <p style="font-size:12px; color:var(--text-dim); margin-bottom:8px;">Belum punya Gemini API Key?</p>
+      <button class="btn secondary sm block" id="howToApiKeyBtn">Cara Mendapatkan API Key</button>
+    </div>
+    <button class="btn block" id="doLoginBtn">MASUK KE XUJIANKU</button>
+  </div>
+  <p class="credit">Web / Desighn by : Deshbanaaa Informatics</p>
+</div>
+
+<!-- ===================== APP SHELL ===================== -->
+<div id="app">
+  <div class="topbar">
+    <div class="brand" id="brandTap"><b>XUjianku</b><span id="topStatus">-</span></div>
+    <div style="display:flex; gap:10px;">
+      <button class="icon-btn" id="notifBtn" aria-label="Notifikasi">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
+      </button>
+      <button class="icon-btn" id="logoutBtn" aria-label="Logout">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <main>
+
+    <!-- HOME / DASHBOARD -->
+    <section class="view" data-view="home">
+      <div class="stat-grid">
+        <div class="glass stat-card"><span class="k">USERNAME</span><div class="v" id="statUsername">-</div></div>
+        <div class="glass stat-card"><span class="k">CODE</span><div class="v" id="statCode">-</div></div>
+        <div class="glass stat-card"><span class="k">SUBSCRIPTION</span><div class="v" id="statSub">-</div></div>
+        <div class="glass stat-card"><span class="k">MASA AKTIF</span><div class="v" id="statExpiry">-</div></div>
+        <div class="glass stat-card" style="grid-column:span 2;"><span class="k">STATUS GEMINI API</span><div class="v" id="statGemini">-</div></div>
+      </div>
+
+      <div class="section-label">MENU UTAMA</div>
+      <div class="glass menu-grid" id="mainMenuGrid" style="padding:14px;"></div>
+    </section>
+
+    <!-- UJIAN SETUP -->
+    <section class="view hidden" data-view="ujian-setup">
+      <div style="margin-bottom:16px;"><h1 style="font-size:20px;">Mulai Ujian</h1><p style="color:var(--text-dim); font-size:12.5px; margin-top:4px;">Atur parameter ujian sebelum memulai.</p></div>
+      <div class="glass" style="padding:16px;">
+        <div class="field"><label class="f-label">Mode</label>
+          <div class="grid2">
+            <div class="opt-btn active" data-mode="ujian">Ujian (Timer)</div>
+            <div class="opt-btn" data-mode="latihan">Latihan (Tanpa Timer)</div>
+          </div>
+        </div>
+        <div class="field"><label class="f-label">Jenjang</label><select id="setJenjang"></select></div>
+        <div class="field"><label class="f-label">Kelas</label><select id="setKelas"></select></div>
+        <div class="field"><label class="f-label">Semester</label><select id="setSemester"><option value="1">Semester 1</option><option value="2">Semester 2</option></select></div>
+        <div class="field"><label class="f-label">Mata Pelajaran</label><select id="setMapel"></select></div>
+        <div class="field"><label class="f-label">Jenis Soal</label>
+          <div class="grid3"><div class="opt-btn active" data-jenis="pg">Pilihan Ganda</div><div class="opt-btn" data-jenis="essay">Essay</div><div class="opt-btn" data-jenis="campuran">Campuran</div></div>
+        </div>
+        <div class="field"><label class="f-label">Jumlah Soal</label>
+          <div class="grid3" id="jmlSoalGrid"></div>
+        </div>
+        <div class="field"><label class="f-label">Sumber Soal</label>
+          <div class="grid2"><div class="opt-btn active" data-source="local">Bank Soal Lokal</div><div class="opt-btn" data-source="ai">Generate via Gemini AI</div></div>
+          <p style="font-size:11px; color:var(--text-faint); margin-top:6px;" id="sourceNote">Bank soal contoh untuk mode demo — tidak spesifik per kelas.</p>
+        </div>
+        <button class="btn block" id="startExamBtn">MULAI</button>
+      </div>
+    </section>
+
+    <!-- RIWAYAT -->
+    <section class="view hidden" data-view="riwayat">
+      <div style="margin-bottom:16px;"><h1 style="font-size:20px;">Riwayat</h1></div>
+      <div id="riwayatList"></div>
+    </section>
+
+    <!-- SUBSCRIPTION -->
+    <section class="view hidden" data-view="subscription">
+      <div style="margin-bottom:16px;"><h1 style="font-size:20px;">Subscription</h1><p style="color:var(--text-dim); font-size:12.5px; margin-top:4px;">Pilih paket sesuai kebutuhan belajarmu.</p></div>
+      <div id="planList"></div>
+    </section>
+
+    <!-- AI / GEMINI -->
+    <section class="view hidden" data-view="ai">
+      <div style="margin-bottom:16px;"><h1 style="font-size:20px;">Gemini AI</h1></div>
+      <div class="glass" style="padding:16px; margin-bottom:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <span style="font-size:13px; color:var(--text-dim);">Status</span>
+          <span class="badge" id="aiStatusBadge">-</span>
+        </div>
+        <div id="aiKeyBox"></div>
+      </div>
+      <div class="section-label" style="margin-top:0;">ALAT BELAJAR AI</div>
+      <div class="menu-grid glass" id="aiToolsGrid" style="padding:14px; grid-template-columns:repeat(3,1fr);"></div>
+    </section>
+
+    <!-- PROFIL -->
+    <section class="view hidden" data-view="profil">
+      <div style="margin-bottom:16px;"><h1 style="font-size:20px;">Profil</h1></div>
+      <div class="glass" style="padding:4px;">
+        <div class="kv" style="padding:12px;"><span>Username</span><b id="pfUsername">-</b></div>
+        <div class="kv" style="padding:12px;"><span>Code</span><b id="pfCode">-</b></div>
+        <div class="kv" style="padding:12px;"><span>Subscription</span><b id="pfSub">-</b></div>
+        <div class="kv" style="padding:12px;"><span>Tanggal Mulai</span><b id="pfStart">-</b></div>
+        <div class="kv" style="padding:12px;"><span>Tanggal Berakhir</span><b id="pfEnd">-</b></div>
+        <div class="kv" style="padding:12px; border-bottom:none;"><span>Status Akun</span><b id="pfStatus">-</b></div>
+      </div>
+      <div class="section-label">PENGATURAN</div>
+      <div class="glass">
+        <div class="row" id="editUsernameRow"><div class="ic">✎</div><div class="tx"><b>Edit Username</b></div><div class="arrow">›</div></div>
+        <div class="divider"></div>
+        <div class="row" id="copyCodeRow"><div class="ic">⧉</div><div class="tx"><b>Copy Code</b></div><div class="arrow">›</div></div>
+        <div class="divider"></div>
+        <div class="row" data-goto="subscription"><div class="ic">★</div><div class="tx"><b>Subscription</b></div><div class="arrow">›</div></div>
+        <div class="divider"></div>
+        <div class="row" data-goto="ai"><div class="ic">◆</div><div class="tx"><b>API Key</b></div><div class="arrow">›</div></div>
+        <div class="divider"></div>
+        <div class="row" id="logoutRow"><div class="ic">⏻</div><div class="tx"><b style="color:var(--danger);">Logout</b></div><div class="arrow">›</div></div>
+      </div>
+    </section>
+
+    <!-- BANTUAN -->
+    <section class="view hidden" data-view="bantuan">
+      <div style="margin-bottom:16px;"><h1 style="font-size:20px;">Bantuan</h1></div>
+      <div class="glass" id="faqList" style="padding:6px;"></div>
+    </section>
+
+    <!-- DEVELOPER GATE -->
+    <section class="view hidden" data-view="dev-gate">
+      <div class="devgate glass" style="padding:24px;">
+        <h3 style="margin-bottom:14px;">Developer Center</h3>
+        <div class="field"><label class="f-label">Password Developer</label><input type="password" id="devPassInput" placeholder="Masukkan password"></div>
+        <button class="btn block" id="devLoginBtn">MASUK</button>
+      </div>
+    </section>
+
+    <!-- DEVELOPER DASHBOARD -->
+    <section class="view hidden" data-view="dev-dash">
+      <div style="margin-bottom:8px;"><h1 style="font-size:20px;">Developer Dashboard</h1></div>
+      <div class="tabbar" id="devTabs"></div>
+      <div id="devPanel" class="glass" style="padding:16px;"></div>
+    </section>
+
+  </main>
+
+  <div class="bottomnav">
+    <button class="navbtn active" data-nav="home"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg><span>Home</span></button>
+    <button class="navbtn" data-nav="ujian-setup"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg><span>Ujian</span></button>
+    <button class="navbtn" data-nav="ai"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M5 19l3-3M16 8l3-3"/></svg><span>AI</span></button>
+    <button class="navbtn" data-nav="subscription"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l2.9 6.3 6.9.9-5 4.8 1.3 6.9L12 17.6 5.9 21l1.3-6.9-5-4.8 6.9-.9z"/></svg><span>Subscription</span></button>
+    <button class="navbtn" data-nav="profil"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>Profile</span></button>
+  </div>
+</div>
+
+<!-- ===================== EXAM RUNNER (fullscreen) ===================== -->
+<div class="exam-wrap hidden" id="examRunner" style="position:fixed; inset:0; z-index:150; background:var(--bg);">
+  <div class="exam-top">
+    <button class="icon-btn" id="examQuitBtn">✕</button>
+    <span id="examMapelLabel" style="font-size:12.5px; color:var(--text-dim);">-</span>
+    <span class="exam-timer" id="examTimer">--:--</span>
+  </div>
+  <div class="exam-progress"><i id="examProgressBar" style="width:0%;"></i></div>
+  <div class="exam-body">
+    <div class="qnum" id="examQNum">Soal 1 dari 10</div>
+    <div class="qtext" id="examQText">-</div>
+    <div id="examOptions"></div>
+  </div>
+  <div class="exam-bottom">
+    <button class="btn secondary" id="examPrevBtn">‹ Sebelumnya</button>
+    <button class="btn secondary" id="examFlagBtn">Tandai</button>
+    <button class="btn" id="examNextBtn">Berikutnya ›</button>
+  </div>
+</div>
+
+<!-- ===================== SHEETS / MODALS ===================== -->
+<div class="overlay center" id="howToApiSheet"><div class="sheet">
+  <h3>Cara Mendapatkan Gemini API Key</h3>
+  <ol style="font-size:13px; color:var(--text-dim); padding-left:18px; line-height:1.8;">
+    <li>Buka Google AI Studio.</li><li>Login menggunakan akun Google.</li><li>Buka bagian API Keys.</li>
+    <li>Buat API key baru.</li><li>Copy API key.</li><li>Masukkan API key tersebut ke XUjianku.</li>
+  </ol>
+  <p style="font-size:11.5px; color:var(--warn); margin:10px 0;">Jangan membagikan API key kepada orang lain.</p>
+  <a class="btn block" href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" style="display:block; text-align:center; text-decoration:none; margin-bottom:8px;">BUKA GOOGLE AI STUDIO</a>
+  <button class="btn ghost block" onclick="Sheets.close('howToApiSheet')">Tutup</button>
+</div></div>
+
+<div class="overlay center" id="examStartConfirm"><div class="sheet">
+  <h3>Mulai Ujian?</h3>
+  <div id="examConfirmBody" style="font-size:12.5px; color:var(--text-dim); margin-bottom:16px;"></div>
+  <div style="display:flex; gap:10px;"><button class="btn ghost" style="flex:1;" onclick="Sheets.close('examStartConfirm')">Batal</button><button class="btn" style="flex:1;" id="examConfirmGo">Mulai</button></div>
+</div></div>
+
+<div class="overlay center" id="submitConfirm"><div class="sheet">
+  <h3>Submit Ujian?</h3>
+  <div id="submitConfirmBody" style="font-size:12.5px; color:var(--text-dim); margin-bottom:16px;"></div>
+  <div style="display:flex; gap:10px;"><button class="btn ghost" style="flex:1;" onclick="Sheets.close('submitConfirm')">Kembali</button><button class="btn" style="flex:1;" id="submitConfirmGo">Submit</button></div>
+</div></div>
+
+<div class="overlay" id="resultSheet"><div class="sheet" id="resultSheetBody" style="max-height:92vh;"></div></div>
+
+<div class="overlay" id="checkoutSheet"><div class="sheet" id="checkoutSheetBody"></div></div>
+
+<div class="overlay" id="aiToolSheet"><div class="sheet" id="aiToolSheetBody"></div></div>
+
+<div class="overlay center" id="editUsernameModal"><div class="sheet">
+  <h3>Edit Username</h3>
+  <div class="field"><input type="text" id="editUsernameInput"></div>
+  <div style="display:flex; gap:10px;"><button class="btn ghost" style="flex:1;" onclick="Sheets.close('editUsernameModal')">Batal</button><button class="btn" style="flex:1;" id="editUsernameSave">Simpan</button></div>
+</div></div>
+
+<div class="overlay" id="notifSheet"><div class="sheet">
+  <div class="sheet-handle"></div><h3>Notifikasi</h3>
+  <div id="notifList"></div>
+</div></div>
+
+<div class="overlay center" id="revokeApiConfirm"><div class="sheet">
+  <h3>Cabut API Key Owner</h3>
+  <p style="font-size:12.5px; color:var(--text-dim); margin-bottom:12px;">Untuk mencabut API Key yang diberikan Owner, konfirmasi melalui WhatsApp.</p>
+  <div id="revokeApiBody" style="margin-bottom:16px;"></div>
+  <div style="display:flex; gap:10px;"><button class="btn ghost" style="flex:1;" onclick="Sheets.close('revokeApiConfirm')">Tutup</button><button class="btn" style="flex:1;" id="revokeApiWaBtn">Konfirmasi via WhatsApp</button></div>
+</div></div>
+
+<div class="overlay center" id="ownerKeyWarnModal"><div class="sheet">
+  <h3>API Key Owner Aktif</h3>
+  <p style="font-size:12.5px; color:var(--text-dim); margin-bottom:16px;">API Key Owner sedang aktif untuk akun ini. API Key pribadi tidak dapat digunakan selama API Key Owner masih terpasang.</p>
+  <div style="display:flex; gap:10px;"><button class="btn ghost" style="flex:1;" onclick="Sheets.close('ownerKeyWarnModal')">TUTUP</button><button class="btn danger" style="flex:1;" id="ownerKeyRevokeBtn">CABUT API KEY</button></div>
+</div></div>
+
+<div class="overlay center" id="devAddApiConfirm"><div class="sheet">
+  <h3>Tambahkan API Key untuk user ini?</h3>
+  <div id="devAddApiBody" style="margin-bottom:16px;"></div>
+  <div style="display:flex; gap:10px;"><button class="btn ghost" style="flex:1;" onclick="Sheets.close('devAddApiConfirm')">BATAL</button><button class="btn" style="flex:1;" id="devAddApiGo">CONFIRM</button></div>
+</div></div>
+
+<input type="file" id="qrisFileInput" accept="image/*" class="hidden">
+
+<script>
+"use strict";
+/* =========================================================================
+   XUjianku — single-file prototype
+   Sections: Configuration | State | Auth | Subscription | Discount |
+   User Management | API Management | Gemini Integration | QRIS | WhatsApp | UI
+   NOTE: This is a client-side demo. For production, move developer auth,
+   subscription, API-key assignment, and user data to a backend + database.
+   ========================================================================= */
+
+/* ===================== 0. UTIL ===================== */
+const $=(s,r)=>(r||document).querySelector(s);
+const $$=(s,r)=>Array.from((r||document).querySelectorAll(s));
+const uid=()=>Math.random().toString(36).slice(2,8);
+const fmtRp=n=>"Rp"+Math.round(n).toLocaleString("id-ID");
+const fmtDate=t=> t? new Date(t).toLocaleDateString("id-ID",{day:"2-digit",month:"short",year:"numeric"}) : "-";
+const nowISO=()=> new Date().toISOString();
+function maskKey(k){ if(!k) return "-"; if(k.length<=8) return "•".repeat(k.length); return k.slice(0,4)+"••••••••••••"+k.slice(-4); }
+function genCode(){ const c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; const r=n=>Array.from({length:n},()=>c[Math.floor(Math.random()*c.length)]).join(""); return `XU-${r(4)}-${r(4)}`; }
+function svg(paths,box){box=box||24; return `<svg width="19" height="19" viewBox="0 0 ${box} ${box}" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;}
+const ICONS={
+  exam:svg('<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>'),
+  latihan:svg('<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>'),
+  riwayat:svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>'),
+  sub:svg('<path d="M12 2l2.9 6.3 6.9.9-5 4.8 1.3 6.9L12 17.6 5.9 21l1.3-6.9-5-4.8 6.9-.9z"/>'),
+  ai:svg('<circle cx="12" cy="12" r="4"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>'),
+  profil:svg('<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>'),
+  bantuan:svg('<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 015 0c0 1.5-2 2-2 3.5"/><circle cx="12" cy="17" r=".2" fill="currentColor"/>'),
+  dev:svg('<path d="M14.7 6.3a4 4 0 105 5L14.3 17l-3-3 5.4-5.4a4 4 0 00-2-2.3z"/><path d="M6 6l3 3-3 3-3-3z"/>'),
+  check:svg('<path d="M20 6L9 17l-5-5"/>')
+};
+
+/* ===================== 1. TOAST & SHEETS ===================== */
+const Toast={ show(msg,type,ms){ ms=ms||2400; const host=$("#toastHost"); const el=document.createElement("div");
+  el.className="toast"+(type?" "+type:""); el.textContent=msg; host.appendChild(el);
+  requestAnimationFrame(()=>el.classList.add("show"));
+  setTimeout(()=>{el.classList.remove("show"); setTimeout(()=>el.remove(),300);},ms); } };
+const Sheets={ open(id){$("#"+id).classList.add("show");}, close(id){$("#"+id).classList.remove("show");} };
+$$(".overlay").forEach(ov=>ov.addEventListener("click",e=>{ if(e.target===ov) ov.classList.remove("show"); }));
+
+/* ===================== 2. CONFIGURATION (Developer-editable) ===================== */
+const DEFAULT_CONFIG = {
+  devPassword:"AD-679-899DX-57", // NOTE: demo-only auth. Move to backend for production.
+  plans:{
+    standard:{ name:"STANDARD", price:5000, features:["Akses latihan soal","Ujian dasar","Riwayat nilai","Pembahasan soal","Generator soal terbatas","Statistik belajar dasar","Dukungan Gemini API milik user"], ownerKeyEligible:false, durationOverride:{} },
+    vip:{ name:"VIP", price:15000, features:["Semua fitur Standard","Generator soal lebih banyak","Pembahasan AI","Statistik belajar lengkap","Fitur AI tambahan","Priority feature access","API Key gratis dari Owner (selama aktif)"], ownerKeyEligible:true, durationOverride:{} },
+    vvip:{ name:"VVIP", price:34500, features:["Semua fitur Standard & VIP","Semua fitur AI","API Key gratis dari Owner","Generator soal sesuai konfigurasi limit","Statistik lengkap","Fitur eksklusif VVIP","Priority access"], ownerKeyEligible:true, durationOverride:{"tahun":3} }
+  },
+  durations:[ {key:"hari",label:"Hari",multiplier:0.05}, {key:"minggu",label:"Minggu",multiplier:0.3}, {key:"bulan",label:"Bulan",multiplier:1}, {key:"tahun",label:"Tahun",multiplier:10} ],
+  discounts:[
+    {code:"XUJI10", percent:10, package:"all", start:"2025-01-01", end:"2030-12-31", active:true},
+    {code:"XVIP20", percent:20, package:"vip", start:"2025-01-01", end:"2030-12-31", active:true}
+  ],
+  qris:null,
+  features:{ essayAiGrading:true, aiExplain:true, aiQuestionGen:true },
+  limits:{ standardDailyGenerate:5, vipDailyGenerate:20, vvipDailyGenerate:50 },
+  maintenance:false,
+  waOwner:"6282143154835"
+};
+const Config = {
+  data:null,
+  load(){ try{ const raw=localStorage.getItem("xuj_config"); this.data = raw? Object.assign({},DEFAULT_CONFIG,JSON.parse(raw)) : JSON.parse(JSON.stringify(DEFAULT_CONFIG)); }
+    catch(e){ this.data = JSON.parse(JSON.stringify(DEFAULT_CONFIG)); } },
+  save(){ localStorage.setItem("xuj_config", JSON.stringify(this.data)); }
+};
+
+/* ===================== 3. STATE / STORAGE ===================== */
+const Store = {
+  getUsers(){ try{ return JSON.parse(localStorage.getItem("xuj_users")||"[]"); }catch(e){ return []; } },
+  saveUsers(list){ localStorage.setItem("xuj_users", JSON.stringify(list)); },
+  findUser(code){ return this.getUsers().find(u=>u.code===code); },
+  upsertUser(user){ const list=this.getUsers(); const i=list.findIndex(u=>u.code===user.code); if(i>=0) list[i]=user; else list.push(user); this.saveUsers(list); },
+  deleteUser(code){ this.saveUsers(this.getUsers().filter(u=>u.code!==code)); },
+
+  getSession(){ return localStorage.getItem("xuj_session")||null; },
+  setSession(code){ localStorage.setItem("xuj_session", code); },
+  clearSession(){ localStorage.removeItem("xuj_session"); },
+
+  getHistory(code){ try{ const all=JSON.parse(localStorage.getItem("xuj_history")||"{}"); return all[code]||[]; }catch(e){ return []; } },
+  addHistory(code, entry){ let all={}; try{ all=JSON.parse(localStorage.getItem("xuj_history")||"{}"); }catch(e){}
+    if(!all[code]) all[code]=[]; all[code].unshift(entry); localStorage.setItem("xuj_history", JSON.stringify(all)); },
+
+  getNotifs(){ try{ return JSON.parse(localStorage.getItem("xuj_notifs")||"[]"); }catch(e){ return []; } },
+  saveNotifs(list){ localStorage.setItem("xuj_notifs", JSON.stringify(list)); },
+  addNotif(text){ const list=this.getNotifs(); list.unshift({id:uid(), text, time:Date.now()}); this.saveNotifs(list); },
+
+  getLogs(){ try{ return JSON.parse(localStorage.getItem("xuj_logs")||"[]"); }catch(e){ return []; } },
+  log(type, detail){ const list=this.getLogs(); list.unshift({time:Date.now(), type, detail}); localStorage.setItem("xuj_logs", JSON.stringify(list.slice(0,300))); }
+};
+
+let CurrentUser = null;
+
+/* ===================== 4. AUTHENTICATION ===================== */
+const Auth = {
+  init(){
+    $("#genCodeBtn").addEventListener("click", ()=>{ $("#loginCode").value = genCode(); this.previewCode(); });
+    $("#loginCode").addEventListener("input", ()=> this.previewCode());
+    $("#doLoginBtn").addEventListener("click", ()=> this.login());
+    $("#howToApiKeyBtn").addEventListener("click", ()=> Sheets.open("howToApiSheet"));
+    if(!$("#loginCode").value) $("#loginCode").value = genCode();
+  },
+  previewCode(){
+    const code = $("#loginCode").value.trim().toUpperCase();
+    const existing = Store.findUser(code);
+    const box = $("#codePreview");
+    if(existing){ box.innerHTML = `Akun ditemukan — <b>${existing.username}</b> · ${(Config.data.plans[existing.subscription.plan]?Config.data.plans[existing.subscription.plan].name:"FREE")} · API: ${existing.ownerApiKey? "Owner Aktif" : (existing.apiKeyPersonal? "Terhubung":"Belum terhubung")}`; }
+    else{ box.innerHTML = "Code baru — akan dibuat akun baru saat masuk."; }
+  },
+  login(){
+    if(Config.data.maintenance){ Toast.show("Aplikasi sedang dalam mode maintenance.","err"); return; }
+    const username = $("#loginUsername").value.trim();
+    let code = $("#loginCode").value.trim().toUpperCase();
+    const apiKey = $("#loginApiKey").value.trim();
+    if(!username){ Toast.show("Username tidak boleh kosong.","err"); return; }
+    if(!code) code = genCode();
+    let user = Store.findUser(code);
+    if(!user){
+      user = { code, username, subscription:{plan:"free", start:null, end:null, status:"active"},
+        apiKeyPersonal: apiKey||null, ownerApiKey:null, ownerApiKeyStatus:"none",
+        createdAt:Date.now(), lastActivity:Date.now() };
+      Store.upsertUser(user);
+      Store.log("register", `User baru: ${username} (${code})`);
+      Toast.show("Akun baru dibuat","ok");
+    } else {
+      user.username = username;
+      if(apiKey && !user.ownerApiKey) user.apiKeyPersonal = apiKey;
+      user.lastActivity = Date.now();
+      Store.upsertUser(user);
+      Store.log("login", `${username} (${code}) login`);
+    }
+    Store.setSession(code);
+    CurrentUser = user;
+    App.enter();
+  },
+  logout(){ Store.log("logout", `${CurrentUser?CurrentUser.username:"?"} logout`); Store.clearSession(); CurrentUser=null; location.reload(); },
+  tryResume(){
+    const code = Store.getSession();
+    if(!code) return false;
+    const user = Store.findUser(code);
+    if(!user) return false;
+    CurrentUser = user; return true;
+  }
+};
+
+/* ===================== 5. SUBSCRIPTION ===================== */
+const Subscription = {
+  isActive(user){ return user.subscription && user.subscription.status==="active" && user.subscription.plan!=="free" && (!user.subscription.end || user.subscription.end > Date.now()); },
+  label(user){
+    if(!user.subscription || user.subscription.plan==="free") return "FREE";
+    const p = Config.data.plans[user.subscription.plan];
+    const name = p? p.name : user.subscription.plan.toUpperCase();
+    if(!this.isActive(user)) return name+" (Berakhir)";
+    return name;
+  },
+  computeTotal(planKey, durationKey, discountCode){
+    const plan = Config.data.plans[planKey];
+    const dur = Config.data.durations.find(d=>d.key===durationKey);
+    if(!plan||!dur) return null;
+    let mult = dur.multiplier;
+    if(plan.durationOverride && plan.durationOverride[durationKey]!=null) mult = plan.durationOverride[durationKey];
+    const base = plan.price * mult;
+    let discountAmount = 0, discountInfo=null;
+    if(discountCode){
+      const d = Config.data.discounts.find(x=> x.code.toUpperCase()===discountCode.toUpperCase() && x.active);
+      if(d && (d.package==="all"||d.package===planKey)){
+        const now = Date.now(); const s=new Date(d.start).getTime(), e=new Date(d.end).getTime()+86400000;
+        if(now>=s && now<=e){ discountAmount = base * (d.percent/100); discountInfo=d; }
+      }
+    }
+    return { base, discountAmount, total: Math.max(0, base-discountAmount), discountInfo, plan, dur };
+  },
+  activate(user, planKey, durationKey){
+    const days = { hari:1, minggu:7, bulan:30, tahun:365 }[durationKey] || 30;
+    user.subscription = { plan:planKey, start:Date.now(), end: Date.now()+days*86400000, status:"active" };
+    Store.upsertUser(user);
+    Store.log("subscription", `${user.username} mengaktifkan ${planKey} (${durationKey})`);
+  }
+};
+
+/* ===================== 6. DISCOUNT ===================== */
+const Discount = {
+  validate(code, planKey){
+    const d = Config.data.discounts.find(x=> x.code.toUpperCase()===code.toUpperCase());
+    if(!d) return {ok:false, msg:"Kode diskon tidak ditemukan."};
+    if(!d.active) return {ok:false, msg:"Kode diskon tidak aktif."};
+    if(d.package!=="all" && d.package!==planKey) return {ok:false, msg:"Kode diskon tidak berlaku untuk paket ini."};
+    const now=Date.now(); const s=new Date(d.start).getTime(), e=new Date(d.end).getTime()+86400000;
+    if(now<s || now>e) return {ok:false, msg:"Kode diskon sudah tidak berlaku."};
+    return {ok:true, discount:d};
+  }
+};
+
+/* ===================== 7. GEMINI INTEGRATION ===================== */
+const Gemini = {
+  getActiveKey(user){ return user.ownerApiKey || user.apiKeyPersonal || null; },
+  status(user){
+    if(user.ownerApiKey) return {state:"owner", label:"API Key Owner Aktif"};
+    if(user.apiKeyPersonal) return {state:"personal", label:"Gemini AI aktif"};
+    return {state:"none", label:"Gemini API belum terhubung"};
+  },
+  async call(apiKey, prompt){
+    if(!apiKey) throw {type:"none", message:"API key belum tersedia."};
+    let res, data;
+    try{
+      res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`,{
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({contents:[{role:"user",parts:[{text:prompt}]}]})
+      });
+    }catch(e){ throw {type:"network", message:"Tidak dapat terhubung ke server Gemini."}; }
+    try{ data = await res.json(); }catch(e){ throw {type:"server", message:"Respon server tidak valid."}; }
+    if(!res.ok){
+      const msg = (data&&data.error&&data.error.message) || "Terjadi kesalahan.";
+      if(res.status===400) throw {type:"invalid_key", message:"API key tidak valid: "+msg};
+      if(res.status===429) throw {type:"quota", message:"Kuota API telah habis."};
+      if(res.status===404) throw {type:"model", message:"Model AI tidak tersedia."};
+      throw {type:"server", message:msg};
+    }
+    const cand = data.candidates && data.candidates[0];
+    const text = cand && cand.content && cand.content.parts && cand.content.parts.map(p=>p.text||"").join("\n");
+    if(!text) throw {type:"server", message:"Gemini tidak mengembalikan hasil."};
+    return text;
+  },
+  friendlyError(e){
+    switch(e.type){
+      case "none": return "Gemini API belum terhubung. Tambahkan API Key terlebih dahulu.";
+      case "invalid_key": return "API key tidak valid. Periksa kembali API key Anda.";
+      case "quota": return "Kuota API Gemini Anda telah habis.";
+      case "network": return "Gagal terhubung ke jaringan. Periksa koneksi internet.";
+      case "model": return "Model AI tidak tersedia saat ini.";
+      default: return e.message || "Terjadi kesalahan pada Gemini AI.";
+    }
+  },
+  async generateQuestions(apiKey, params){
+    const prompt = `Buat ${params.jumlah} soal ${params.jenis==='campuran'?'(campuran pilihan ganda dan essay)':params.jenis} untuk mata pelajaran ${params.mapel}, jenjang ${params.jenjang} kelas ${params.kelas}, semester ${params.semester}. `+
+      `Jawab HANYA dengan JSON array valid tanpa teks lain, dengan format: untuk pilihan ganda {"type":"pg","question":"...","options":["...","...","...","..."],"answerIndex":0,"explanation":"..."} dan untuk essay {"type":"essay","question":"...","modelAnswer":"..."}.`;
+    const text = await this.call(apiKey, prompt);
+    let jsonStr = text.trim();
+    const s = jsonStr.indexOf("["), e = jsonStr.lastIndexOf("]");
+    if(s>=0 && e>s) jsonStr = jsonStr.slice(s, e+1);
+    let arr;
+    try{ arr = JSON.parse(jsonStr); }catch(err){ throw {type:"server", message:"Format soal dari AI tidak valid. Coba lagi."}; }
+    if(!Array.isArray(arr) || !arr.length) throw {type:"server", message:"AI tidak menghasilkan soal."};
+    return arr;
+  }
+};
+
+/* ===================== 8. QRIS ===================== */
+const Qris = {
+  set(dataUrl){ Config.data.qris = dataUrl; Config.save(); },
+  remove(){ Config.data.qris = null; Config.save(); }
+};
+
+/* ===================== 9. WHATSAPP ===================== */
+const WA = {
+  open(message){ const url = `https://wa.me/${Config.data.waOwner}?text=${encodeURIComponent(message)}`; window.open(url, "_blank"); },
+  paymentMessage(user, plan, durLabel, total, discountCode){
+    return `👋 hai Owner website "XUjianku", saya mau confirm pembayaran langganan.\n\n`+
+      `• Jenis langganan : ${plan.name}\n`+
+      `• Total bayar : ${fmtRp(total)}\n`+
+      `• Waktu langganan : ${durLabel}\n`+
+      `• CODE : ${user.code}\n`+
+      `• Username : ${user.username}\n`+
+      `• Kode diskon : ${discountCode||"-"}`;
+  },
+  revokeMessage(user){
+    return `👋 hai Owner website "XUjianku", saya ingin mencabut API Key Owner dari akun saya.\n\n`+
+      `• Username : ${user.username}\n`+
+      `• Code : ${user.code}\n`+
+      `• Subscription : ${Subscription.label(user)}\n`+
+      `• Status : ${user.ownerApiKeyStatus}\n`+
+      `• Alasan : Ingin menggunakan API Key sendiri.\n\n`+
+      `Mohon konfirmasi pencabutan API Key Owner.`;
+  }
+};
+
+/* ===================== 10. LOCAL QUESTION BANK (demo) ===================== */
+const LOCAL_BANK = {
+  matematika:{ pg:[
+    {question:"Hasil dari 24 + 18 × 2 adalah?", options:["60","84","42","96"], answerIndex:0, explanation:"Perkalian dikerjakan lebih dulu: 18×2=36, lalu 24+36=60."},
+    {question:"Keliling persegi dengan sisi 7 cm adalah?", options:["14 cm","21 cm","28 cm","49 cm"], answerIndex:2, explanation:"Keliling persegi = 4×sisi = 4×7 = 28 cm."},
+    {question:"Bentuk sederhana dari pecahan 12/18 adalah?", options:["2/3","3/4","4/6","6/9"], answerIndex:0, explanation:"FPB(12,18)=6, sehingga 12/18 = 2/3."},
+    {question:"Nilai x pada persamaan 2x + 5 = 17 adalah?", options:["5","6","7","8"], answerIndex:1, explanation:"2x=12, x=6."},
+    {question:"Luas segitiga dengan alas 10 cm dan tinggi 8 cm adalah?", options:["18 cm²","40 cm²","80 cm²","20 cm²"], answerIndex:1, explanation:"Luas = ½×alas×tinggi = ½×10×8 = 40 cm²."}
+  ], essay:[ {question:"Jelaskan langkah-langkah menyelesaikan persamaan linear satu variabel 3x - 4 = 11.", modelAnswer:"3x=15, x=5, dijelaskan dengan langkah memindahkan konstanta dan membagi koefisien."} ]},
+  bahasa_indonesia:{ pg:[
+    {question:"Kalimat yang menggunakan kata baku adalah?", options:["Saya mau pergi kesekolah","Ia sedang menganalisa data","Kami akan mempraktikkan materi ini","Dia sudah menterjemahkan buku itu"], answerIndex:2, explanation:"Kata 'mempraktikkan' adalah bentuk baku, sedangkan lainnya tidak baku."},
+    {question:"Ide pokok paragraf biasanya terdapat pada?", options:["Kalimat penjelas","Kalimat utama","Judul saja","Kata penghubung"], answerIndex:1, explanation:"Ide pokok terdapat pada kalimat utama paragraf."},
+    {question:"Sinonim dari kata 'giat' adalah?", options:["Malas","Rajin","Diam","Lambat"], answerIndex:1, explanation:"Giat bersinonim dengan rajin."},
+    {question:"Antonim dari kata 'kuat' adalah?", options:["Lemah","Besar","Tinggi","Cepat"], answerIndex:0, explanation:"Antonim kuat adalah lemah."}
+  ], essay:[ {question:"Tuliskan sebuah paragraf deskriptif singkat tentang suasana pagi hari di desa.", modelAnswer:"Jawaban bervariasi, dinilai dari kejelasan deskripsi dan penggunaan kalimat efektif."} ]},
+  bahasa_inggris:{ pg:[
+    {question:"Choose the correct sentence:", options:["She go to school every day","She goes to school every day","She going to school every day","She gone to school every day"], answerIndex:1, explanation:"Subject 'She' uses verb+s in simple present: goes."},
+    {question:"The opposite of 'difficult' is?", options:["Easy","Hard","Slow","Heavy"], answerIndex:0, explanation:"'Easy' is the antonym of 'difficult'."},
+    {question:"\"They ___ football yesterday.\" Fill in the blank:", options:["play","plays","played","playing"], answerIndex:2, explanation:"Past tense of 'play' is 'played'."}
+  ], essay:[ {question:"Write three sentences introducing yourself in English.", modelAnswer:"Answers vary; assess grammar and clarity."} ]},
+  ipa:{ pg:[
+    {question:"Proses tumbuhan membuat makanan sendiri disebut?", options:["Respirasi","Fotosintesis","Transpirasi","Fermentasi"], answerIndex:1, explanation:"Fotosintesis adalah proses pembentukan makanan oleh tumbuhan menggunakan cahaya matahari."},
+    {question:"Satuan SI untuk gaya adalah?", options:["Joule","Newton","Watt","Pascal"], answerIndex:1, explanation:"Newton (N) adalah satuan gaya."},
+    {question:"Organ yang berfungsi memompa darah adalah?", options:["Paru-paru","Ginjal","Jantung","Hati"], answerIndex:2, explanation:"Jantung berfungsi memompa darah ke seluruh tubuh."}
+  ], essay:[ {question:"Jelaskan perbedaan antara perubahan fisika dan perubahan kimia beserta contohnya.", modelAnswer:"Perubahan fisika tidak menghasilkan zat baru, perubahan kimia menghasilkan zat baru."} ]},
+  ips:{ pg:[
+    {question:"Ibu kota negara Indonesia adalah?", options:["Bandung","Jakarta","Surabaya","Medan"], answerIndex:1, explanation:"Jakarta adalah ibu kota negara Indonesia (status transisi ke IKN sedang berjalan)."},
+    {question:"Kegiatan menukar barang dengan barang disebut?", options:["Barter","Jual beli","Kredit","Ekspor"], answerIndex:0, explanation:"Barter adalah pertukaran barang dengan barang."},
+    {question:"Benua terluas di dunia adalah?", options:["Afrika","Eropa","Asia","Australia"], answerIndex:2, explanation:"Asia merupakan benua terluas di dunia."}
+  ], essay:[ {question:"Jelaskan dampak positif dan negatif globalisasi bagi Indonesia.", modelAnswer:"Jawaban bervariasi, mencakup aspek ekonomi, sosial, dan budaya."} ]},
+  pendidikan_pancasila:{ pg:[
+    {question:"Sila kelima Pancasila berbunyi?", options:["Ketuhanan Yang Maha Esa","Kemanusiaan yang adil dan beradab","Persatuan Indonesia","Keadilan sosial bagi seluruh rakyat Indonesia"], answerIndex:3, explanation:"Sila kelima adalah Keadilan sosial bagi seluruh rakyat Indonesia."},
+    {question:"Lambang sila pertama Pancasila adalah?", options:["Bintang","Rantai","Pohon beringin","Padi dan kapas"], answerIndex:0, explanation:"Lambang sila pertama adalah bintang."}
+  ], essay:[ {question:"Jelaskan makna gotong royong dalam kehidupan sehari-hari.", modelAnswer:"Jawaban bervariasi, menekankan kerja sama dan kebersamaan."} ]},
+  informatika:{ pg:[
+    {question:"Satuan dasar penyimpanan data terkecil adalah?", options:["Byte","Bit","Kilobyte","Megabyte"], answerIndex:1, explanation:"Bit adalah satuan data terkecil (0 atau 1)."},
+    {question:"HTML digunakan untuk?", options:["Mengelola basis data","Membuat struktur halaman web","Mengatur jaringan","Mengompres file"], answerIndex:1, explanation:"HTML digunakan untuk membuat struktur halaman web."}
+  ], essay:[ {question:"Jelaskan perbedaan antara hardware dan software.", modelAnswer:"Hardware adalah perangkat keras fisik, software adalah perangkat lunak/program."} ]},
+  pai:{ pg:[
+    {question:"Rukun Islam yang pertama adalah?", options:["Puasa","Zakat","Syahadat","Haji"], answerIndex:2, explanation:"Rukun Islam pertama adalah mengucap dua kalimat syahadat."},
+    {question:"Kitab suci umat Islam adalah?", options:["Taurat","Injil","Zabur","Al-Qur'an"], answerIndex:3, explanation:"Kitab suci umat Islam adalah Al-Qur'an."}
+  ], essay:[ {question:"Jelaskan pentingnya akhlak mulia dalam kehidupan sehari-hari.", modelAnswer:"Jawaban bervariasi, menekankan perilaku terpuji dan hubungan sosial."} ]},
+  pjok:{ pg:[
+    {question:"Induk organisasi sepak bola dunia adalah?", options:["FIBA","FIFA","IAAF","IOC"], answerIndex:1, explanation:"FIFA adalah induk organisasi sepak bola dunia."},
+    {question:"Manfaat utama pemanasan sebelum olahraga adalah?", options:["Menambah berat badan","Mencegah cedera","Menurunkan stamina","Mempercepat lelah"], answerIndex:1, explanation:"Pemanasan membantu mencegah cedera otot."}
+  ], essay:[ {question:"Jelaskan manfaat aktivitas fisik rutin bagi kesehatan tubuh.", modelAnswer:"Jawaban bervariasi, mencakup kebugaran jantung, otot, dan mental."} ]},
+  prakarya:{ pg:[
+    {question:"Bahan yang berasal dari alam dan mudah terurai disebut?", options:["Bahan sintetis","Bahan organik","Bahan logam","Bahan plastik"], answerIndex:1, explanation:"Bahan organik berasal dari alam dan mudah terurai."},
+    {question:"Contoh kerajinan dari bahan limbah adalah?", options:["Vas dari botol bekas","Meja kayu jati baru","Baju katun baru","Sepatu kulit baru"], answerIndex:0, explanation:"Vas dari botol bekas adalah contoh pemanfaatan bahan limbah."}
+  ], essay:[ {question:"Jelaskan langkah-langkah membuat kerajinan dari bahan limbah di sekitarmu.", modelAnswer:"Jawaban bervariasi sesuai bahan dan produk yang dipilih."} ]}
+};
+function buildLocalQuestions(mapelKey, jenis, jumlah){
+  const bank = LOCAL_BANK[mapelKey] || LOCAL_BANK.matematika;
+  let pool = [];
+  if(jenis==="pg") pool = bank.pg.map(q=>Object.assign({type:"pg"},q));
+  else if(jenis==="essay") pool = bank.essay.map(q=>Object.assign({type:"essay"},q));
+  else pool = bank.pg.map(q=>Object.assign({type:"pg"},q)).concat(bank.essay.map(q=>Object.assign({type:"essay"},q)));
+  pool = pool.sort(()=>Math.random()-0.5);
+  const out = [];
+  let limited = pool.length < jumlah;
+  for(let i=0;i<jumlah;i++){ out.push(Object.assign({}, pool[i % pool.length])); }
+  return { questions: out, limited };
+}
+
+/* ===================== 11. ROUTER ===================== */
+const Router = {
+  go(view){
+    $$(".view").forEach(v=>v.classList.add("hidden"));
+    const t = $(`.view[data-view="${view}"]`); if(t) t.classList.remove("hidden");
+    $$(".navbtn").forEach(b=>b.classList.toggle("active", b.dataset.nav===view));
+    window.scrollTo(0,0);
+    if(view==="home") Dashboard.render();
+    if(view==="ujian-setup") ExamSetup.render();
+    if(view==="riwayat") Riwayat.render();
+    if(view==="subscription") SubscriptionView.render();
+    if(view==="ai") AIView.render();
+    if(view==="profil") ProfilView.render();
+    if(view==="bantuan") Bantuan.render();
+    if(view==="dev-dash") DevDash.render();
+  }
+};
+$$(".navbtn").forEach(b=> b.addEventListener("click", ()=> Router.go(b.dataset.nav)));
+$$("[data-goto]").forEach(el=> el.addEventListener("click", ()=> Router.go(el.dataset.goto)));
+
+/* ===================== 12. DASHBOARD ===================== */
+const MAIN_MENU = [
+  {key:"ujian-setup", label:"Mulai Ujian", icon:"exam"},
+  {key:"ujian-setup", label:"Latihan Soal", icon:"latihan"},
+  {key:"riwayat", label:"Riwayat", icon:"riwayat"},
+  {key:"subscription", label:"Subscription", icon:"sub"},
+  {key:"ai", label:"API Gemini", icon:"ai"},
+  {key:"profil", label:"Profil", icon:"profil"},
+  {key:"bantuan", label:"Bantuan", icon:"bantuan"},
+  {key:"__dev__", label:"Developer", icon:"dev"}
+];
+const Dashboard = {
+  render(){
+    $("#statUsername").textContent = CurrentUser.username;
+    $("#statCode").textContent = CurrentUser.code;
+    $("#statSub").textContent = Subscription.label(CurrentUser);
+    $("#statExpiry").textContent = CurrentUser.subscription.end ? fmtDate(CurrentUser.subscription.end) : "-";
+    const g = Gemini.status(CurrentUser);
+    $("#statGemini").textContent = g.label;
+    $("#topStatus").textContent = Subscription.label(CurrentUser);
+    $("#mainMenuGrid").innerHTML = MAIN_MENU.map((m,i)=> `<div class="menu-item" data-mkey="${i}">${ICONS[m.icon]}<span>${m.label}</span></div>`).join("");
+    $$("#mainMenuGrid .menu-item").forEach(el=>{
+      const m = MAIN_MENU[Number(el.dataset.mkey)];
+      el.addEventListener("click", ()=>{ if(m.key==="__dev__") Router.go("dev-gate"); else Router.go(m.key); });
+    });
+  }
+};
+$("#logoutBtn").addEventListener("click", ()=> Auth.logout());
+$("#logoutRow").addEventListener("click", ()=> Auth.logout());
+$("#notifBtn").addEventListener("click", ()=>{
+  const list = Store.getNotifs().slice(0,20);
+  $("#notifList").innerHTML = list.length ? list.map(n=> `<div class="row" style="padding:12px 4px;"><div class="tx"><b style="font-weight:500; font-size:13px;">${n.text}</b><span>${new Date(n.time).toLocaleString("id-ID")}</span></div></div>`).join("") : `<div class="empty-state"><b>Tidak ada notifikasi</b></div>`;
+  Sheets.open("notifSheet");
+});
+
+/* Brand tap easter egg not needed; dev access via menu */
+
+/* ===================== 13. EXAM SETUP ===================== */
+const JENJANG_KELAS = { SD:[1,2,3,4,5,6], SMP:[7,8,9], MTs:[7,8,9], SMA:[10,11,12], MA:[10,11,12], SMK:[10,11,12] };
+const MAPEL_LIST = [
+  ["matematika","Matematika"],["bahasa_indonesia","Bahasa Indonesia"],["bahasa_inggris","Bahasa Inggris"],
+  ["ipa","IPA"],["ips","IPS"],["pendidikan_pancasila","Pendidikan Pancasila"],["informatika","Informatika"],
+  ["pai","PAI"],["pjok","PJOK"],["prakarya","Prakarya"]
+];
+const ExamSetup = {
+  mode:"ujian", jenis:"pg", source:"local", jumlah:10,
+  render(){
+    const jj = $("#setJenjang"); jj.innerHTML = Object.keys(JENJANG_KELAS).map(k=>`<option value="${k}">${k}</option>`).join("");
+    this.fillKelas();
+    jj.onchange = ()=> this.fillKelas();
+    const mp = $("#setMapel"); mp.innerHTML = MAPEL_LIST.map(([k,l])=>`<option value="${k}">${l}</option>`).join("");
+    $$("[data-mode]").forEach(el=> el.onclick=()=>{ $$("[data-mode]").forEach(x=>x.classList.remove("active")); el.classList.add("active"); this.mode=el.dataset.mode; });
+    $$("[data-jenis]").forEach(el=> el.onclick=()=>{ $$("[data-jenis]").forEach(x=>x.classList.remove("active")); el.classList.add("active"); this.jenis=el.dataset.jenis; });
+    $$("[data-source]").forEach(el=> el.onclick=()=>{ $$("[data-source]").forEach(x=>x.classList.remove("active")); el.classList.add("active"); this.source=el.dataset.source;
+      $("#sourceNote").textContent = this.source==="ai" ? "Soal dibuat oleh Gemini AI menggunakan API key akun Anda." : "Bank soal contoh untuk mode demo — tidak spesifik per kelas.";
+    });
+    $("#jmlSoalGrid").innerHTML = [10,20,30,40,50].map((n,i)=>`<div class="opt-btn ${i===0?'active':''}" data-jml="${n}">${n}</div>`).join("");
+    $$("[data-jml]").forEach(el=> el.onclick=()=>{ $$("[data-jml]").forEach(x=>x.classList.remove("active")); el.classList.add("active"); this.jumlah=Number(el.dataset.jml); });
+    $("#startExamBtn").onclick = ()=> this.confirmStart();
+  },
+  fillKelas(){
+    const jenjang = $("#setJenjang").value;
+    $("#setKelas").innerHTML = JENJANG_KELAS[jenjang].map(k=>`<option value="${k}">Kelas ${k}</option>`).join("");
+  },
+  confirmStart(){
+    const jenjang=$("#setJenjang").value, kelas=$("#setKelas").value, semester=$("#setSemester").value, mapel=$("#setMapel").value;
+    const mapelLabel = MAPEL_LIST.find(m=>m[0]===mapel)[1];
+    if(this.source==="ai" && !Gemini.getActiveKey(CurrentUser)){ Toast.show("Gemini API belum terhubung. Hubungkan API key terlebih dahulu.","err"); return; }
+    $("#examConfirmBody").innerHTML = `<div class="kv"><span>Mapel</span><b>${mapelLabel}</b></div><div class="kv"><span>Jenjang/Kelas</span><b>${jenjang} · Kelas ${kelas}</b></div>
+      <div class="kv"><span>Jenis Soal</span><b>${this.jenis}</b></div><div class="kv"><span>Jumlah</span><b>${this.jumlah}</b></div>
+      <div class="kv" style="border-bottom:none;"><span>Mode</span><b>${this.mode==='ujian'?'Ujian (Timer)':'Latihan'}</b></div>`;
+    Sheets.open("examStartConfirm");
+    $("#examConfirmGo").onclick = ()=>{ Sheets.close("examStartConfirm"); this.start(jenjang,kelas,semester,mapel,mapelLabel); };
+  },
+  async start(jenjang,kelas,semester,mapel,mapelLabel){
+    let questions, limited=false;
+    if(this.source==="local"){
+      const r = buildLocalQuestions(mapel, this.jenis, this.jumlah); questions=r.questions; limited=r.limited;
+      if(limited) Toast.show("Bank soal lokal terbatas, sebagian soal diulang secara acak.");
+    } else {
+      Toast.show("Membuat soal dengan Gemini AI...");
+      try{
+        const raw = await Gemini.generateQuestions(Gemini.getActiveKey(CurrentUser), {jumlah:this.jumlah, jenis:this.jenis, mapel:mapelLabel, jenjang, kelas, semester});
+        questions = raw.map(q=> q.type==="essay" ? {type:"essay", question:q.question, modelAnswer:q.modelAnswer||""} : {type:"pg", question:q.question, options:q.options||[], answerIndex:q.answerIndex||0, explanation:q.explanation||""});
+      }catch(e){ Toast.show(Gemini.friendlyError(e),"err"); return; }
+    }
+    ExamRunner.begin({ mapelLabel, jenjang, kelas, semester, mode:this.mode, questions });
+  }
+};
+
+/* ===================== 14. EXAM RUNNER ===================== */
+const ExamRunner = {
+  session:null, timerInt:null,
+  begin(cfg){
+    this.session = { ...cfg, answers:new Array(cfg.questions.length).fill(null), flagged:new Array(cfg.questions.length).fill(false),
+      current:0, startedAt:Date.now(), secondsLeft: cfg.mode==="ujian" ? cfg.questions.length*90 : null };
+    $("#examRunner").classList.remove("hidden");
+    $("#examMapelLabel").textContent = cfg.mapelLabel;
+    this.renderQuestion();
+    if(this.session.mode==="ujian") this.startTimer(); else $("#examTimer").textContent="LATIHAN";
+  },
+  startTimer(){
+    this.updateTimerLabel();
+    this.timerInt = setInterval(()=>{
+      this.session.secondsLeft--;
+      this.updateTimerLabel();
+      if(this.session.secondsLeft<=0){ clearInterval(this.timerInt); Toast.show("Waktu habis, ujian disubmit otomatis."); this.finish(); }
+    },1000);
+  },
+  updateTimerLabel(){
+    const s=this.session.secondsLeft; const m=Math.floor(s/60), sec=s%60;
+    const el = $("#examTimer"); el.textContent = `${m}:${String(sec).padStart(2,"0")}`;
+    el.classList.toggle("low", s<60);
+  },
+  renderQuestion(){
+    const s = this.session, i = s.current, q = s.questions[i];
+    $("#examQNum").textContent = `Soal ${i+1} dari ${s.questions.length}`;
+    $("#examQText").textContent = q.question;
+    $("#examProgressBar").style.width = Math.round(((i+1)/s.questions.length)*100)+"%";
+    const opts = $("#examOptions");
+    if(q.type==="pg"){
+      opts.innerHTML = q.options.map((op,idx)=> `<div class="opt-row ${s.answers[i]===idx?'selected':''}" data-oi="${idx}"><div class="opt-letter">${String.fromCharCode(65+idx)}</div><div>${op}</div></div>`).join("");
+      $$(".opt-row",opts).forEach(el=> el.onclick=()=>{ s.answers[i]=Number(el.dataset.oi); this.renderQuestion(); });
+    } else {
+      opts.innerHTML = `<textarea rows="6" placeholder="Tulis jawaban essay di sini..." id="essayInput">${s.answers[i]||""}</textarea>`;
+      $("#essayInput").oninput = e=>{ s.answers[i]=e.target.value; };
+    }
+    $("#examFlagBtn").textContent = s.flagged[i] ? "Batalkan Tanda" : "Tandai";
+    $("#examPrevBtn").disabled = i===0;
+    $("#examNextBtn").textContent = i===s.questions.length-1 ? "Selesai ›" : "Berikutnya ›";
+  },
+  prev(){ if(this.session.current>0){ this.session.current--; this.renderQuestion(); } },
+  next(){ const s=this.session; if(s.current<s.questions.length-1){ s.current++; this.renderQuestion(); } else { this.confirmSubmit(); } },
+  toggleFlag(){ const s=this.session; s.flagged[s.current]=!s.flagged[s.current]; this.renderQuestion(); },
+  confirmSubmit(){
+    const s=this.session;
+    const answered = s.answers.filter(a=>a!==null && a!=="").length;
+    const empty = s.questions.length-answered;
+    $("#submitConfirmBody").innerHTML = `<div class="kv"><span>Terjawab</span><b>${answered}</b></div><div class="kv" style="border-bottom:none;"><span>Kosong</span><b>${empty}</b></div>`;
+    Sheets.open("submitConfirm");
+    $("#submitConfirmGo").onclick = ()=>{ Sheets.close("submitConfirm"); this.finish(); };
+  },
+  quit(){
+    if(confirm("Keluar dari ujian? Progres tidak akan disimpan.")){
+      if(this.timerInt) clearInterval(this.timerInt);
+      $("#examRunner").classList.add("hidden");
+    }
+  },
+  finish(){
+    if(this.timerInt) clearInterval(this.timerInt);
+    const s = this.session;
+    let correct=0, wrong=0, empty=0;
+    s.questions.forEach((q,i)=>{
+      const a = s.answers[i];
+      if(a===null || a===""){ empty++; return; }
+      if(q.type==="pg"){ if(a===q.answerIndex) correct++; else wrong++; }
+      else { /* essay graded manually/AI, count as answered but not auto-scored */ }
+    });
+    const pgCount = s.questions.filter(q=>q.type==="pg").length;
+    const nilai = pgCount>0 ? Math.round((correct/pgCount)*100) : 0;
+    const elapsedSec = Math.round((Date.now()-s.startedAt)/1000);
+    const result = { id:uid(), time:Date.now(), mapel:s.mapelLabel, jenjang:s.jenjang, kelas:s.kelas, mode:s.mode,
+      nilai, correct, wrong, empty, total:s.questions.length, elapsedSec, questions:s.questions, answers:s.answers };
+    Store.addHistory(CurrentUser.code, result);
+    Store.addNotif(`Hasil ujian ${s.mapelLabel} tersimpan: nilai ${nilai}.`);
+    Store.log("exam", `${CurrentUser.username} menyelesaikan ujian ${s.mapelLabel} (nilai ${nilai})`);
+    $("#examRunner").classList.add("hidden");
+    ResultView.show(result);
+  }
+};
+$("#examPrevBtn").addEventListener("click", ()=>ExamRunner.prev());
+$("#examNextBtn").addEventListener("click", ()=>ExamRunner.next());
+$("#examFlagBtn").addEventListener("click", ()=>ExamRunner.toggleFlag());
+$("#examQuitBtn").addEventListener("click", ()=>ExamRunner.quit());
+
+/* ===================== 15. RESULT / RIWAYAT ===================== */
+const ResultView = {
+  show(result){
+    const pct = result.total? Math.round(((result.correct+ (result.total-result.correct-result.wrong-result.empty))/result.total)*100) : 0;
+    const mm = Math.floor(result.elapsedSec/60), ss=result.elapsedSec%60;
+    $("#resultSheetBody").innerHTML = `
+      <div class="sheet-handle"></div>
+      <div class="result-hero"><div class="result-score">${result.nilai}</div><div style="font-size:12px; color:var(--text-dim);">${result.mapel}</div></div>
+      <div class="result-stats">
+        <div class="glass"><b>${result.correct}</b><span>BENAR</span></div>
+        <div class="glass"><b>${result.wrong}</b><span>SALAH</span></div>
+        <div class="glass"><b>${result.empty}</b><span>KOSONG</span></div>
+        <div class="glass"><b>${result.total}</b><span>TOTAL</span></div>
+        <div class="glass"><b>${mm}:${String(ss).padStart(2,'0')}</b><span>WAKTU</span></div>
+      </div>
+      <div class="section-label" style="margin-top:10px;">PEMBAHASAN</div>
+      <div id="reviewList"></div>
+      <button class="btn secondary block" style="margin-top:12px;" onclick="Sheets.close('resultSheet')">Tutup</button>`;
+    const rl = $("#reviewList");
+    rl.innerHTML = result.questions.map((q,i)=>{
+      const a = result.answers[i];
+      let ansHtml;
+      if(q.type==="pg"){
+        const correct = a===q.answerIndex;
+        ansHtml = `<div class="ans ${a===null?'':(correct?'correct':'wrong')}">Jawaban Anda: ${a===null?'(kosong)':String.fromCharCode(65+a)} — Kunci: ${String.fromCharCode(65+q.answerIndex)}</div>
+          <div style="font-size:11.5px; color:var(--text-faint);">${q.explanation||''}</div>`;
+      } else {
+        ansHtml = `<div class="ans">Jawaban Anda: ${a? a : '(kosong)'}</div><div style="font-size:11.5px; color:var(--text-faint);">Essay dinilai manual atau via AI.</div>`;
+      }
+      return `<div class="glass review-item"><div class="qh">${i+1}. ${q.question}</div>${ansHtml}
+        <button class="btn ghost sm" data-explain="${i}" style="margin-top:8px;">Jelaskan dengan AI</button>
+        <div class="ai-explain-box hidden" id="explainBox${i}"></div></div>`;
+    }).join("");
+    $$("[data-explain]",rl).forEach(btn=> btn.addEventListener("click", ()=> ResultView.explain(result, Number(btn.dataset.explain))));
+    Sheets.open("resultSheet");
+  },
+  async explain(result, idx){
+    const key = Gemini.getActiveKey(CurrentUser);
+    const box = $("#explainBox"+idx);
+    box.classList.remove("hidden");
+    if(!key){ box.textContent = "Gemini API belum terhubung."; return; }
+    box.innerHTML = `<div class="aiskel" style="width:90%;"></div><div class="aiskel" style="width:70%;"></div>`;
+    const q = result.questions[idx];
+    const prompt = q.type==="pg"
+      ? `Jelaskan secara singkat mengapa jawaban "${q.options[q.answerIndex]}" benar untuk soal: "${q.question}". Berikan penjelasan 2-4 kalimat dalam bahasa Indonesia.`
+      : `Berikan contoh jawaban model singkat untuk soal essay berikut dalam bahasa Indonesia: "${q.question}"`;
+    try{ const text = await Gemini.call(key, prompt); box.textContent = text; }
+    catch(e){ box.textContent = Gemini.friendlyError(e); }
+  }
+};
+
+const Riwayat = {
+  render(){
+    const list = Store.getHistory(CurrentUser.code);
+    const host = $("#riwayatList");
+    if(!list.length){ host.innerHTML = `<div class="empty-state"><b>Belum ada riwayat</b><p>Riwayat ujian akan muncul di sini.</p></div>`; return; }
+    host.innerHTML = list.map(r=> `<div class="glass row" data-rid="${r.id}"><div class="ic">${ICONS.riwayat}</div><div class="tx"><b>${r.mapel} — Nilai ${r.nilai}</b><span>${new Date(r.time).toLocaleString('id-ID')} · ${r.correct} benar / ${r.wrong} salah / ${r.empty} kosong</span></div><div class="arrow">›</div></div>`).join("");
+    $$("[data-rid]",host).forEach(el=> el.addEventListener("click", ()=>{
+      const r = list.find(x=>x.id===el.dataset.rid); if(r) ResultView.show(r);
+    }));
+  }
+};
+
+/* ===================== 16. SUBSCRIPTION VIEW / CHECKOUT ===================== */
+const SubscriptionView = {
+  render(){
+    const host = $("#planList");
+    host.innerHTML = Object.entries(Config.data.plans).map(([key,p])=>{
+      return `<div class="glass plan-card ${key}">
+        <div class="plan-name">${p.name}</div>
+        <div class="plan-price">${fmtRp(p.price)} <span>/ bulan</span></div>
+        ${p.features.map(f=>`<div class="plan-feat">${ICONS.check}<span>${f}</span></div>`).join("")}
+        <button class="btn block" style="margin-top:14px;" data-plan="${key}">Pilih ${p.name}</button>
+      </div>`;
+    }).join("");
+    $$("[data-plan]",host).forEach(btn=> btn.addEventListener("click", ()=> Checkout.open(btn.dataset.plan)));
+  }
+};
+const Checkout = {
+  open(planKey){
+    this.planKey = planKey; this.durationKey = "bulan"; this.discountCode = "";
+    this.render();
+    Sheets.open("checkoutSheet");
+  },
+  render(){
+    const plan = Config.data.plans[this.planKey];
+    const calc = Subscription.computeTotal(this.planKey, this.durationKey, this.discountCode);
+    $("#checkoutSheetBody").innerHTML = `
+      <div class="sheet-handle"></div><h3>Checkout — ${plan.name}</h3>
+      <div class="field"><label class="f-label">Durasi</label>
+        <div class="grid2" id="durGrid">${Config.data.durations.map(d=>`<div class="opt-btn ${d.key===this.durationKey?'active':''}" data-dur="${d.key}">${d.label}</div>`).join("")}</div>
+      </div>
+      <div class="field"><label class="f-label">Kode Diskon</label>
+        <div style="display:flex; gap:8px;"><input type="text" id="discInput" placeholder="Masukkan kode diskon" value="${this.discountCode}" style="flex:1;"><button class="btn secondary sm" id="applyDiscBtn">GUNAKAN</button></div>
+      </div>
+      <div class="glass" style="padding:14px; margin-bottom:14px;">
+        <div class="kv"><span>Harga awal</span><b>${fmtRp(calc.base)}</b></div>
+        <div class="kv"><span>Diskon</span><b>${calc.discountAmount? "-"+fmtRp(calc.discountAmount) : "Rp0"}</b></div>
+        <div class="kv" style="border-bottom:none;"><span>Total</span><b>${fmtRp(calc.total)}</b></div>
+      </div>
+      <div class="field"><label class="f-label">QRIS Pembayaran</label>
+        ${Config.data.qris ? `<img src="${Config.data.qris}" style="width:100%; border-radius:14px; border:1px solid var(--line);">` : `<div class="empty-state" style="padding:24px;"><b>QRIS belum diatur oleh Owner</b></div>`}
+      </div>
+      <button class="btn block" id="waConfirmBtn">KONFIRMASI PEMBAYARAN VIA WHATSAPP</button>`;
+    $$("[data-dur]").forEach(el=> el.onclick=()=>{ this.durationKey=el.dataset.dur; this.render(); });
+    $("#applyDiscBtn").onclick = ()=>{
+      const code = $("#discInput").value.trim();
+      if(!code){ this.discountCode=""; this.render(); return; }
+      const v = Discount.validate(code, this.planKey);
+      if(!v.ok){ Toast.show(v.msg,"err"); this.discountCode=""; } else { Toast.show("Kode diskon diterapkan","ok"); this.discountCode=code; }
+      this.render();
+    };
+    $("#waConfirmBtn").onclick = ()=>{
+      const plan = Config.data.plans[this.planKey];
+      const dur = Config.data.durations.find(d=>d.key===this.durationKey);
+      const calc2 = Subscription.computeTotal(this.planKey, this.durationKey, this.discountCode);
+      const msg = WA.paymentMessage(CurrentUser, plan, dur.label, calc2.total, this.discountCode);
+      WA.open(msg);
+      Store.addNotif("Pembayaran menunggu konfirmasi.");
+      Store.log("checkout", `${CurrentUser.username} checkout ${plan.name} (${dur.label}) total ${fmtRp(calc2.total)}`);
+      Toast.show("Pesan WhatsApp dibuka. Menunggu konfirmasi Owner.","ok");
+      Sheets.close("checkoutSheet");
+    };
+  }
+};
+
+/* ===================== 17. AI VIEW (Profile-side Gemini management) ===================== */
+const AI_TOOLS = [
+  {key:"buat-soal", label:"Buat Soal", icon:"exam"},
+  {key:"latihan-materi", label:"Latihan dari Materi", icon:"latihan"},
+  {key:"ringkas-materi", label:"Ringkas Materi", icon:"riwayat"},
+  {key:"tanya-ai", label:"Tanya AI", icon:"ai"},
+  {key:"bantuan-matematika", label:"Bantuan Matematika", icon:"sub"},
+  {key:"pembahasan", label:"Buat Pembahasan", icon:"bantuan"}
+];
+const AIView = {
+  render(){
+    const status = Gemini.status(CurrentUser);
+    const badge = $("#aiStatusBadge");
+    badge.textContent = status.label;
+    badge.className = "badge " + (status.state==="none" ? "no" : status.state==="owner" ? "ok" : "ok");
+    const box = $("#aiKeyBox");
+    if(CurrentUser.ownerApiKey){
+      box.innerHTML = `<div class="kv"><span>API Key</span><b class="maskkey">${maskKey(CurrentUser.ownerApiKey)}</b></div>
+        <button class="btn danger block sm" style="margin-top:10px;" id="tryChangeOwnerKey">Ganti API Key</button>`;
+      $("#tryChangeOwnerKey").onclick = ()=> Sheets.open("ownerKeyWarnModal");
+    } else {
+      box.innerHTML = `<div class="field"><label class="f-label">API Key Pribadi</label><input type="password" id="aiKeyInput" placeholder="Masukkan API Key" value="${CurrentUser.apiKeyPersonal||''}"></div>
+        <div style="display:flex; gap:8px;"><button class="btn secondary" style="flex:1;" id="testKeyBtn">Test Koneksi</button><button class="btn" style="flex:1;" id="saveKeyBtn">Simpan</button></div>`;
+      $("#saveKeyBtn").onclick = ()=>{ CurrentUser.apiKeyPersonal = $("#aiKeyInput").value.trim()||null; Store.upsertUser(CurrentUser); Toast.show("API key disimpan","ok"); AIView.render(); Dashboard.render(); };
+      $("#testKeyBtn").onclick = async ()=>{
+        const k = $("#aiKeyInput").value.trim();
+        if(!k){ Toast.show("Masukkan API key terlebih dahulu.","err"); return; }
+        Toast.show("Menguji koneksi...");
+        try{ await Gemini.call(k, "Balas dengan kata: OK"); Toast.show("Koneksi berhasil — Gemini AI aktif.","ok"); }
+        catch(e){ Toast.show(Gemini.friendlyError(e),"err"); }
+      };
+    }
+    $("#aiToolsGrid").innerHTML = AI_TOOLS.map((t,i)=>`<div class="menu-item" data-tool="${i}">${ICONS[t.icon]}<span>${t.label}</span></div>`).join("");
+    $$("#aiToolsGrid .menu-item").forEach(el=> el.addEventListener("click", ()=> AIToolSheet.open(AI_TOOLS[Number(el.dataset.tool)].key)));
+  }
+};
+$("#ownerKeyRevokeBtn").addEventListener("click", ()=>{ Sheets.close("ownerKeyWarnModal"); RevokeFlow.open(); });
+
+const RevokeFlow = {
+  open(){
+    $("#revokeApiBody").innerHTML = `<div class="kv"><span>Username</span><b>${CurrentUser.username}</b></div><div class="kv"><span>Code</span><b>${CurrentUser.code}</b></div>
+      <div class="kv" style="border-bottom:none;"><span>Subscription</span><b>${Subscription.label(CurrentUser)}</b></div>`;
+    Sheets.open("revokeApiConfirm");
+  }
+};
+$("#revokeApiWaBtn").addEventListener("click", ()=>{
+  WA.open(WA.revokeMessage(CurrentUser));
+  Store.log("api-revoke-request", `${CurrentUser.username} meminta pencabutan API key owner`);
+  Sheets.close("revokeApiConfirm");
+  Toast.show("Permintaan dikirim via WhatsApp. Menunggu konfirmasi Owner.","ok");
+});
+
+const AIToolSheet = {
+  open(key){
+    this.key = key;
+    const titles = {"buat-soal":"Buat Soal Otomatis","latihan-materi":"Latihan dari Materi","ringkas-materi":"Ringkas Materi","tanya-ai":"Tanya AI","bantuan-matematika":"Bantuan Matematika","pembahasan":"Buat Pembahasan"};
+    const needsMateri = key==="latihan-materi" || key==="ringkas-materi";
+    const isQuestion = key==="tanya-ai" || key==="bantuan-matematika";
+    $("#aiToolSheetBody").innerHTML = `<div class="sheet-handle"></div><h3>${titles[key]}</h3>
+      <div class="field"><textarea id="aiToolInput" rows="5" placeholder="${needsMateri? 'Tempel materi di sini...' : isQuestion? 'Tulis pertanyaanmu...' : 'Contoh: Matematika kelas 8 tentang aljabar'}"></textarea></div>
+      <button class="btn block" id="aiToolRunBtn">Generate</button>
+      <div id="aiToolResult" style="margin-top:14px;"></div>`;
+    Sheets.open("aiToolSheet");
+    $("#aiToolRunBtn").onclick = ()=> this.run();
+  },
+  async run(){
+    const key = Gemini.getActiveKey(CurrentUser);
+    const input = $("#aiToolInput").value.trim();
+    const resBox = $("#aiToolResult");
+    if(!key){ resBox.innerHTML = `<div class="ai-explain-box">Gemini API belum terhubung.</div>`; return; }
+    if(!input){ Toast.show("Isi input terlebih dahulu.","err"); return; }
+    resBox.innerHTML = `<div class="aiskel" style="width:95%;"></div><div class="aiskel" style="width:80%;"></div><div class="aiskel" style="width:60%;"></div>`;
+    const prompts = {
+      "buat-soal": `Buatkan 3 contoh soal latihan singkat (beserta jawaban) tentang: ${input}. Jawab dalam bahasa Indonesia.`,
+      "latihan-materi": `Berdasarkan materi berikut, buatkan 3 soal latihan beserta jawabannya:\n\n${input}`,
+      "ringkas-materi": `Ringkas materi berikut menjadi poin-poin penting dalam bahasa Indonesia:\n\n${input}`,
+      "tanya-ai": `Jawab pertanyaan berikut secara jelas dan edukatif dalam bahasa Indonesia: ${input}`,
+      "bantuan-matematika": `Bantu selesaikan soal matematika berikut dengan langkah-langkah yang jelas: ${input}`,
+      "pembahasan": `Buatkan pembahasan lengkap untuk topik/soal berikut: ${input}`
+    };
+    try{ const text = await Gemini.call(key, prompts[this.key]); resBox.innerHTML = `<div class="ai-explain-box">${text.replace(/</g,'&lt;')}</div>`; }
+    catch(e){ resBox.innerHTML = `<div class="ai-explain-box" style="color:var(--danger);">${Gemini.friendlyError(e)}</div>`; }
+  }
+};
+
+/* ===================== 18. PROFIL ===================== */
+const ProfilView = {
+  render(){
+    $("#pfUsername").textContent = CurrentUser.username;
+    $("#pfCode").textContent = CurrentUser.code;
+    $("#pfSub").textContent = Subscription.label(CurrentUser);
+    $("#pfStart").textContent = fmtDate(CurrentUser.subscription.start);
+    $("#pfEnd").textContent = fmtDate(CurrentUser.subscription.end);
+    $("#pfStatus").textContent = CurrentUser.subscription.status==="suspended" ? "Ditangguhkan" : "Aktif";
+  }
+};
+$("#editUsernameRow").addEventListener("click", ()=>{ $("#editUsernameInput").value=CurrentUser.username; Sheets.open("editUsernameModal"); });
+$("#editUsernameSave").addEventListener("click", ()=>{
+  const v = $("#editUsernameInput").value.trim(); if(!v){ Toast.show("Username tidak boleh kosong.","err"); return; }
+  CurrentUser.username=v; Store.upsertUser(CurrentUser); Toast.show("Username diperbarui","ok"); Sheets.close("editUsernameModal"); Dashboard.render(); ProfilView.render();
+});
+$("#copyCodeRow").addEventListener("click", ()=>{
+  navigator.clipboard && navigator.clipboard.writeText(CurrentUser.code).then(()=> Toast.show("Code disalin: "+CurrentUser.code,"ok")).catch(()=> Toast.show(CurrentUser.code));
+});
+
+/* ===================== 19. BANTUAN ===================== */
+const FAQ = [
+  ["Bagaimana cara mendapatkan Gemini API Key?", "Buka menu API Gemini lalu tekan 'Cara Mendapatkan API Key' untuk panduan lengkap."],
+  ["Apakah pembayaran subscription otomatis aktif?", "Tidak. Pembayaran dikonfirmasi manual melalui WhatsApp Owner setelah Anda melakukan pembayaran via QRIS."],
+  ["Kenapa nilai essay tidak otomatis?", "Soal essay memerlukan pemeriksaan manual atau bantuan AI karena jawabannya bersifat naratif."],
+  ["Apakah data saya dikirim ke server?", "Data akun dan riwayat disimpan secara lokal di perangkat Anda (localStorage/IndexedDB) untuk versi prototype ini."]
+];
+const Bantuan = { render(){ $("#faqList").innerHTML = FAQ.map(([q,a])=> `<div class="row" style="display:block;"><b style="font-size:13px;">${q}</b><p style="font-size:12px; color:var(--text-dim); margin-top:6px;">${a}</p></div><div class="divider"></div>`).join(""); } };
+
+/* ===================== 20. DEVELOPER CENTER ===================== */
+const DevSession = { active:false };
+$("#devLoginBtn").addEventListener("click", ()=>{
+  const pass = $("#devPassInput").value;
+  if(pass === Config.data.devPassword){ DevSession.active=true; Store.log("dev-login","Developer login berhasil"); Router.go("dev-dash"); }
+  else { Toast.show("Password salah.","err"); }
+});
+
+const DEV_TABS = [
+  ["users","User Management"],["subs","Subscription Management"],["apikeys","API Key Management"],
+  ["qris","QRIS Management"],["discounts","Discount Management"],["pricing","Pricing Management"],
+  ["features","Feature Management"],["notifs","Notification Management"],["system","System Settings"],
+  ["logs","Activity Logs"],["production","Production Architecture"]
+];
+const DevDash = {
+  activeTab:"users",
+  render(){
+    if(!DevSession.active){ Router.go("dev-gate"); return; }
+    $("#devTabs").innerHTML = DEV_TABS.map(([k,l])=>`<div class="tabbtn ${this.activeTab===k?'active':''}" data-dt="${k}">${l}</div>`).join("");
+    $$("[data-dt]").forEach(el=> el.onclick=()=>{ this.activeTab=el.dataset.dt; this.render(); });
+    this.renderPanel();
+  },
+  renderPanel(){
+    const p = $("#devPanel");
+    const fn = {
+      users:DevUsers, subs:DevSubs, apikeys:DevApiKeys, qris:DevQris, discounts:DevDiscounts,
+      pricing:DevPricing, features:DevFeatures, notifs:DevNotifs, system:DevSystem, logs:DevLogs, production:DevProduction
+    }[this.activeTab];
+    p.innerHTML = fn.html();
+    if(fn.bind) fn.bind();
+  }
+};
+
+const DevUsers = {
+  html(){
+    const users = Store.getUsers();
+    return `<div class="dev-panel-title">User Management</div>
+      <input type="text" id="devUserSearch" placeholder="Cari username atau code...">
+      <div class="tblwrap"><table class="dtable"><thead><tr><th>Username</th><th>Code</th><th>Plan</th><th>Owner Key</th><th>Berakhir</th><th>Status</th><th>Aksi</th></tr></thead>
+      <tbody id="devUserRows">${DevUsers.rows(users)}</tbody></table></div>`;
+  },
+  rows(users){
+    return users.map(u=>`<tr>
+      <td>${u.username}</td><td>${u.code}</td><td>${Subscription.label(u)}</td>
+      <td>${u.ownerApiKey? 'Ya':'Tidak'}</td><td>${fmtDate(u.subscription.end)}</td>
+      <td>${u.subscription.status}</td>
+      <td style="display:flex; gap:4px;">
+        <button class="btn secondary sm" data-extend="${u.code}">+30hr</button>
+        <button class="btn secondary sm" data-suspend="${u.code}">${u.subscription.status==='suspended'?'Aktifkan':'Suspend'}</button>
+        <button class="btn danger sm" data-deluser="${u.code}">Hapus</button>
+        <button class="btn ghost sm" data-resetapi="${u.code}">Reset API</button>
+      </td></tr>`).join("");
+  },
+  bind(){
+    $("#devUserSearch").oninput = e=>{
+      const q = e.target.value.toLowerCase();
+      const filtered = Store.getUsers().filter(u=> u.username.toLowerCase().includes(q) || u.code.toLowerCase().includes(q));
+      $("#devUserRows").innerHTML = DevUsers.rows(filtered);
+      DevUsers.bindRowActions();
+    };
+    this.bindRowActions();
+  },
+  bindRowActions(){
+    $$("[data-extend]").forEach(b=> b.onclick=()=>{ const u=Store.findUser(b.dataset.extend); u.subscription.end=(u.subscription.end||Date.now())+30*86400000; if(u.subscription.plan==='free') u.subscription.plan='standard'; u.subscription.status='active'; Store.upsertUser(u); Store.log('dev-extend',`Extend ${u.code} +30 hari`); Toast.show('Subscription diperpanjang','ok'); DevDash.renderPanel(); });
+    $$("[data-suspend]").forEach(b=> b.onclick=()=>{ const u=Store.findUser(b.dataset.suspend); u.subscription.status = u.subscription.status==='suspended'?'active':'suspended'; Store.upsertUser(u); Store.log('dev-suspend',`${u.code} -> ${u.subscription.status}`); DevDash.renderPanel(); });
+    $$("[data-deluser]").forEach(b=> b.onclick=()=>{ if(confirm('Hapus user ini?')){ Store.deleteUser(b.dataset.deluser); Store.log('dev-deluser',`Hapus user ${b.dataset.deluser}`); Toast.show('User dihapus','ok'); DevDash.renderPanel(); } });
+    $$("[data-resetapi]").forEach(b=> b.onclick=()=>{ const u=Store.findUser(b.dataset.resetapi); u.ownerApiKey=null; u.ownerApiKeyStatus='none'; u.apiKeyPersonal=null; Store.upsertUser(u); Store.log('dev-resetapi',`Reset API ${u.code}`); Toast.show('API key direset','ok'); DevDash.renderPanel(); });
+  }
+};
+
+const DevSubs = {
+  html(){
+    const plans = Config.data.plans;
+    return `<div class="dev-panel-title">Subscription Management</div>` + Object.entries(plans).map(([key,p])=>`
+      <div class="glass" style="padding:14px; margin-bottom:12px;">
+        <b>${p.name}</b>
+        <div class="field" style="margin-top:10px;"><label class="f-label">Harga per bulan (Rp)</label><input type="number" data-price="${key}" value="${p.price}"></div>
+        <div class="field"><label class="f-label">Fitur (satu per baris)</label><textarea rows="5" data-features="${key}">${p.features.join("\n")}</textarea></div>
+        <button class="btn secondary sm" data-saveplan="${key}">Simpan ${p.name}</button>
+      </div>`).join("");
+  },
+  bind(){
+    $$("[data-saveplan]").forEach(b=> b.onclick=()=>{
+      const key=b.dataset.saveplan;
+      const price = Number($(`[data-price="${key}"]`).value)||0;
+      const features = $(`[data-features="${key}"]`).value.split("\n").map(s=>s.trim()).filter(Boolean);
+      Config.data.plans[key].price = price; Config.data.plans[key].features = features; Config.save();
+      Store.log('dev-plan-edit', `Plan ${key} diperbarui`); Toast.show('Plan disimpan','ok');
+    });
+  }
+};
+
+const DevPricing = {
+  html(){
+    return `<div class="dev-panel-title">Pricing Management</div>
+      <div class="section-label" style="margin-top:0;">DURASI & MULTIPLIER</div>
+      ${Config.data.durations.map((d,i)=>`<div class="field"><label class="f-label">${d.label} (kali lipat harga bulan)</label><input type="number" step="0.01" data-durmult="${i}" value="${d.multiplier}"></div>`).join("")}
+      <button class="btn secondary sm" id="saveDurBtn">Simpan Durasi</button>
+      <div class="section-label">OVERRIDE PER PAKET (opsional, format JSON)</div>
+      ${Object.entries(Config.data.plans).map(([k,p])=>`<div class="field"><label class="f-label">${p.name} durationOverride</label><input type="text" data-override="${k}" value='${JSON.stringify(p.durationOverride||{})}'></div>`).join("")}
+      <button class="btn secondary sm" id="saveOverrideBtn">Simpan Override</button>`;
+  },
+  bind(){
+    $("#saveDurBtn").onclick = ()=>{
+      Config.data.durations.forEach((d,i)=>{ d.multiplier = Number($(`[data-durmult="${i}"]`).value)||d.multiplier; });
+      Config.save(); Store.log('dev-pricing','Durasi/multiplier diperbarui'); Toast.show('Durasi disimpan','ok');
+    };
+    $("#saveOverrideBtn").onclick = ()=>{
+      let ok=true;
+      Object.keys(Config.data.plans).forEach(k=>{
+        try{ Config.data.plans[k].durationOverride = JSON.parse($(`[data-override="${k}"]`).value||"{}"); }catch(e){ ok=false; }
+      });
+      if(!ok){ Toast.show("Format JSON override tidak valid.","err"); return; }
+      Config.save(); Store.log('dev-pricing-override','Override durasi diperbarui'); Toast.show('Override disimpan','ok');
+    };
+  }
+};
+
+const DevApiKeys = {
+  found:null,
+  html(){
+    return `<div class="dev-panel-title">API Key Management</div>
+      <div class="field"><label class="f-label">Code User</label><div style="display:flex; gap:8px;"><input type="text" id="apiSearchCode" placeholder="XU-XXXX-XXXX" style="flex:1;"><button class="btn secondary sm" id="apiSearchBtn">Cari User</button></div></div>
+      <div id="apiSearchResult"></div>`;
+  },
+  bind(){
+    $("#apiSearchBtn").onclick = ()=>{
+      const code = $("#apiSearchCode").value.trim().toUpperCase();
+      const u = Store.findUser(code);
+      const box = $("#apiSearchResult");
+      if(!u){ box.innerHTML = `<div class="empty-state" style="padding:20px;"><b>User tidak ditemukan</b></div>`; return; }
+      DevApiKeys.found = u;
+      box.innerHTML = `<div class="glass" style="padding:14px; margin-top:12px;">
+        <div class="kv"><span>Username</span><b>${u.username}</b></div>
+        <div class="kv"><span>Code</span><b>${u.code}</b></div>
+        <div class="kv"><span>Subscription</span><b>${Subscription.label(u)}</b></div>
+        <div class="kv" style="border-bottom:none;"><span>Status</span><b>${u.ownerApiKey? 'Owner Key Aktif' : 'Belum ada Owner Key'}</b></div>
+        ${(u.subscription.plan==='vip'||u.subscription.plan==='vvip') ? `
+        <div class="field" style="margin-top:12px;"><label class="f-label">API Key</label><input type="text" id="ownerKeyInput" placeholder="Masukkan API Key"></div>
+        <button class="btn block" id="confirmAddApiBtn">CONFIRM & TAMBAHKAN API KEY</button>` :
+        `<p style="font-size:11.5px; color:var(--warn); margin-top:10px;">User bukan VIP/VVIP — tidak eligible menerima API Key gratis dari Owner.</p>`}
+      </div>`;
+      if(u.subscription.plan==='vip'||u.subscription.plan==='vvip'){
+        $("#confirmAddApiBtn").onclick = ()=>{
+          const key = $("#ownerKeyInput").value.trim();
+          if(!key){ Toast.show("Masukkan API key.","err"); return; }
+          $("#devAddApiBody").innerHTML = `<div class="kv"><span>Username</span><b>${u.username}</b></div><div class="kv"><span>Code</span><b>${u.code}</b></div><div class="kv" style="border-bottom:none;"><span>Subscription</span><b>${Subscription.label(u)}</b></div>`;
+          Sheets.open("devAddApiConfirm");
+          $("#devAddApiGo").onclick = ()=>{
+            u.ownerApiKey = key; u.ownerApiKeyStatus='active'; u.apiKeyPersonal=null; Store.upsertUser(u);
+            Store.log('dev-apikey-add', `Owner API key ditambahkan untuk ${u.code}`);
+            Store.addNotif("API Key Owner berhasil ditambahkan.");
+            Toast.show("API Key ditambahkan","ok"); Sheets.close("devAddApiConfirm"); DevDash.renderPanel();
+          };
+        };
+      }
+    };
+  }
+};
+
+const DevQris = {
+  html(){
+    return `<div class="dev-panel-title">QRIS Management</div>
+      ${Config.data.qris ? `<img src="${Config.data.qris}" style="width:100%; max-width:280px; border-radius:14px; border:1px solid var(--line); display:block; margin-bottom:12px;">` : `<div class="empty-state" style="padding:20px; margin-bottom:12px;"><b>Belum ada QRIS</b></div>`}
+      <div style="display:flex; gap:10px;"><button class="btn secondary" id="uploadQrisBtn">Upload QRIS</button>${Config.data.qris? '<button class="btn danger" id="removeQrisBtn">Hapus</button>' : ''}</div>
+      <p style="font-size:11px; color:var(--text-faint); margin-top:10px;">Untuk production, simpan QRIS dan konfigurasi pembayaran di backend/database, bukan localStorage.</p>`;
+  },
+  bind(){
+    $("#uploadQrisBtn").onclick = ()=> $("#qrisFileInput").click();
+    const rm = $("#removeQrisBtn"); if(rm) rm.onclick = ()=>{ Qris.remove(); Store.log('dev-qris-remove','QRIS dihapus'); Toast.show('QRIS dihapus','ok'); DevDash.renderPanel(); };
+  }
+};
+$("#qrisFileInput").addEventListener("change", e=>{
+  const f = e.target.files[0]; if(!f) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{ Qris.set(reader.result); Store.log('dev-qris-upload','QRIS diperbarui'); Toast.show('QRIS diperbarui','ok'); DevDash.renderPanel(); };
+  reader.readAsDataURL(f);
+  e.target.value="";
+});
+
+const DevDiscounts = {
+  html(){
+    return `<div class="dev-panel-title">Discount Management</div>
+      <div class="tblwrap"><table class="dtable"><thead><tr><th>Code</th><th>%</th><th>Paket</th><th>Mulai</th><th>Selesai</th><th>Status</th><th>Aksi</th></tr></thead>
+      <tbody>${Config.data.discounts.map((d,i)=>`<tr><td>${d.code}</td><td>${d.percent}%</td><td>${d.package}</td><td>${d.start}</td><td>${d.end}</td>
+        <td>${d.active?'Aktif':'Nonaktif'}</td><td style="display:flex; gap:4px;"><button class="btn secondary sm" data-toggledisc="${i}">${d.active?'Nonaktifkan':'Aktifkan'}</button><button class="btn danger sm" data-deldisc="${i}">Hapus</button></td></tr>`).join("")}</tbody></table></div>
+      <div class="section-label">TAMBAH KODE DISKON</div>
+      <div class="field"><label class="f-label">Code</label><input type="text" id="newDiscCode" placeholder="XUJI10"></div>
+      <div class="field"><label class="f-label">Persentase (%)</label><input type="number" id="newDiscPercent" value="10"></div>
+      <div class="field"><label class="f-label">Paket</label><select id="newDiscPackage"><option value="all">Semua Paket</option><option value="standard">Standard</option><option value="vip">VIP</option><option value="vvip">VVIP</option></select></div>
+      <div class="grid2"><div class="field"><label class="f-label">Mulai</label><input type="date" id="newDiscStart"></div><div class="field"><label class="f-label">Selesai</label><input type="date" id="newDiscEnd"></div></div>
+      <button class="btn block" id="addDiscBtn">Tambah Kode Diskon</button>`;
+  },
+  bind(){
+    $$("[data-toggledisc]").forEach(b=> b.onclick=()=>{ const d=Config.data.discounts[Number(b.dataset.toggledisc)]; d.active=!d.active; Config.save(); Store.log('dev-discount-toggle',`${d.code} -> ${d.active}`); DevDash.renderPanel(); });
+    $$("[data-deldisc]").forEach(b=> b.onclick=()=>{ Config.data.discounts.splice(Number(b.dataset.deldisc),1); Config.save(); Store.log('dev-discount-delete','Kode diskon dihapus'); DevDash.renderPanel(); });
+    $("#addDiscBtn").onclick = ()=>{
+      const code=$("#newDiscCode").value.trim().toUpperCase(); const percent=Number($("#newDiscPercent").value)||0;
+      const pkg=$("#newDiscPackage").value; const start=$("#newDiscStart").value||"2025-01-01"; const end=$("#newDiscEnd").value||"2030-12-31";
+      if(!code){ Toast.show("Kode diskon wajib diisi.","err"); return; }
+      Config.data.discounts.push({code,percent,package:pkg,start,end,active:true}); Config.save();
+      Store.log('dev-discount-add', `Kode ${code} ditambahkan`); Toast.show("Kode diskon ditambahkan","ok"); DevDash.renderPanel();
+    };
+  }
+};
+
+const DevFeatures = {
+  html(){
+    const f = Config.data.features, l = Config.data.limits;
+    return `<div class="dev-panel-title">Feature Management</div>
+      <div class="row"><div class="tx"><b>Generator Soal AI</b></div><div class="switch ${f.aiQuestionGen?'on':''}" data-feat="aiQuestionGen"><i></i></div></div>
+      <div class="row"><div class="tx"><b>Penjelasan Jawaban AI</b></div><div class="switch ${f.aiExplain?'on':''}" data-feat="aiExplain"><i></i></div></div>
+      <div class="row"><div class="tx"><b>Penilaian Essay via AI</b></div><div class="switch ${f.essayAiGrading?'on':''}" data-feat="essayAiGrading"><i></i></div></div>
+      <div class="section-label">LIMIT GENERATOR SOAL / HARI</div>
+      <div class="field"><label class="f-label">Standard</label><input type="number" id="limStd" value="${l.standardDailyGenerate}"></div>
+      <div class="field"><label class="f-label">VIP</label><input type="number" id="limVip" value="${l.vipDailyGenerate}"></div>
+      <div class="field"><label class="f-label">VVIP</label><input type="number" id="limVvip" value="${l.vvipDailyGenerate}"></div>
+      <button class="btn secondary sm" id="saveLimitsBtn">Simpan Limit</button>`;
+  },
+  bind(){
+    $$("[data-feat]").forEach(sw=> sw.onclick=()=>{ const k=sw.dataset.feat; Config.data.features[k]=!Config.data.features[k]; Config.save(); sw.classList.toggle("on", Config.data.features[k]); });
+    $("#saveLimitsBtn").onclick = ()=>{
+      Config.data.limits.standardDailyGenerate = Number($("#limStd").value)||0;
+      Config.data.limits.vipDailyGenerate = Number($("#limVip").value)||0;
+      Config.data.limits.vvipDailyGenerate = Number($("#limVvip").value)||0;
+      Config.save(); Store.log('dev-limits','Limit generator diperbarui'); Toast.show('Limit disimpan','ok');
+    };
+  }
+};
+
+const DevNotifs = {
+  html(){
+    const list = Store.getNotifs();
+    return `<div class="dev-panel-title">Notification Management</div>
+      <div class="field"><label class="f-label">Buat Notifikasi Baru</label><textarea id="newNotifText" rows="2" placeholder="Contoh: Subscription Anda akan berakhir dalam 3 hari."></textarea></div>
+      <button class="btn secondary sm" id="addNotifBtn">Kirim Notifikasi</button>
+      <div class="section-label">DAFTAR NOTIFIKASI</div>
+      <div class="tblwrap">${list.length? list.map(n=>`<div class="row"><div class="tx"><b style="font-weight:500; font-size:13px;">${n.text}</b><span>${new Date(n.time).toLocaleString('id-ID')}</span></div><button class="btn danger sm" data-delnotif="${n.id}">Hapus</button></div>`).join("") : `<div class="empty-state" style="padding:20px;"><b>Belum ada notifikasi</b></div>`}</div>`;
+  },
+  bind(){
+    $("#addNotifBtn").onclick = ()=>{
+      const t = $("#newNotifText").value.trim(); if(!t){ Toast.show("Isi teks notifikasi.","err"); return; }
+      Store.addNotif(t); Store.log('dev-notif-add','Notifikasi baru dibuat'); Toast.show('Notifikasi dikirim','ok'); DevDash.renderPanel();
+    };
+    $$("[data-delnotif]").forEach(b=> b.onclick=()=>{ Store.saveNotifs(Store.getNotifs().filter(n=>n.id!==b.dataset.delnotif)); DevDash.renderPanel(); });
+  }
+};
+
+const DevSystem = {
+  html(){
+    return `<div class="dev-panel-title">System Settings</div>
+      <div class="row"><div class="tx"><b>Mode Maintenance</b><span>Blokir login pengguna biasa</span></div><div class="switch ${Config.data.maintenance?'on':''}" id="maintSwitch"><i></i></div></div>
+      <div class="field" style="margin-top:14px;"><label class="f-label">Nomor WhatsApp Owner</label><input type="text" id="waOwnerInput" value="${Config.data.waOwner}"></div>
+      <div class="field"><label class="f-label">Password Developer</label><input type="text" id="devPassEdit" value="${Config.data.devPassword}"></div>
+      <button class="btn secondary sm" id="saveSystemBtn">Simpan Pengaturan</button>
+      <p style="font-size:11px; color:var(--text-faint); margin-top:10px;">Untuk production, autentikasi Developer sebaiknya dipindahkan ke backend, bukan disimpan di kode klien.</p>`;
+  },
+  bind(){
+    $("#maintSwitch").onclick = ()=>{ Config.data.maintenance=!Config.data.maintenance; Config.save(); $("#maintSwitch").classList.toggle("on",Config.data.maintenance); };
+    $("#saveSystemBtn").onclick = ()=>{
+      Config.data.waOwner = $("#waOwnerInput").value.trim().replace(/\D/g,"");
+      Config.data.devPassword = $("#devPassEdit").value;
+      Config.save(); Store.log('dev-system','Pengaturan sistem diperbarui'); Toast.show('Pengaturan disimpan','ok');
+    };
+  }
+};
+
+const DevLogs = {
+  html(){
+    const logs = Store.getLogs();
+    return `<div class="dev-panel-title">Activity Logs</div>
+      <button class="btn danger sm" id="clearLogsBtn" style="margin-bottom:10px;">Bersihkan Log</button>
+      <div class="tblwrap"><table class="dtable"><thead><tr><th>Waktu</th><th>Tipe</th><th>Detail</th></tr></thead>
+      <tbody>${logs.map(l=>`<tr><td>${new Date(l.time).toLocaleString('id-ID')}</td><td>${l.type}</td><td>${l.detail}</td></tr>`).join("")}</tbody></table></div>`;
+  },
+  bind(){ $("#clearLogsBtn").onclick = ()=>{ localStorage.removeItem("xuj_logs"); Toast.show("Log dibersihkan","ok"); DevDash.renderPanel(); }; }
+};
+
+const DevProduction = {
+  html(){
+    return `<div class="dev-panel-title">Production Architecture</div>
+      <p style="font-size:13px; color:var(--text-dim); line-height:1.7;">
+      Prototype ini berjalan sepenuhnya di satu file HTML dengan localStorage sebagai penyimpanan.
+      Untuk aplikasi produksi, arsitektur yang disarankan adalah:</p>
+      <ul style="font-size:12.5px; color:var(--text-dim); line-height:1.9; padding-left:18px;">
+        <li><b style="color:var(--text);">Frontend</b> — antarmuka pengguna (dapat tetap mirip UI ini).</li>
+        <li><b style="color:var(--text);">Backend</b> — menangani autentikasi, subscription, penetapan API key, autentikasi Developer, konfigurasi QRIS, diskon, database pengguna, dan verifikasi pembayaran.</li>
+        <li><b style="color:var(--text);">Database</b> — misalnya Firebase, Supabase, atau backend custom untuk menyimpan data pengguna dan transaksi secara aman.</li>
+      </ul>
+      <p style="font-size:12.5px; color:var(--warn); margin-top:12px;">Untuk Gemini API, jangan menaruh secret milik Owner di sisi client — gunakan server-side secret/environment variable.</p>`;
+  },
+  bind(){}
+};
+
+/* ===================== 21. APP BOOT ===================== */
+const App = {
+  enter(){
+    $("#loginScreen").classList.add("hidden");
+    $("#app").classList.add("ready");
+    Router.go("home");
+  }
+};
+
+function boot(){
+  Config.load();
+  setTimeout(()=>{
+    $("#splash").style.opacity="0";
+    setTimeout(()=>{
+      $("#splash").style.display="none";
+      Auth.init();
+      if(Auth.tryResume()){ App.enter(); }
+      else { $("#loginScreen").classList.remove("hidden"); Auth.previewCode(); }
+    },420);
+  },700);
+}
+boot();
+</script>
+</body>
+</html>
